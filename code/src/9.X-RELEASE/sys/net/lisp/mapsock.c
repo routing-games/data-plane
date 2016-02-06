@@ -769,6 +769,9 @@ map_msg1(int type, struct map_addrinfo *mapinfo, struct mbuf ** mpkt)
 	struct mbuf * mp = NULL; 
 	int i;
 	struct sockaddr_storage *ss;
+	/* y5er */
+	struct sockaddr_storage *source_ip;
+	/* y5er */
 	int len, dlen;
 
 	switch (type) {
@@ -809,6 +812,37 @@ map_msg1(int type, struct map_addrinfo *mapinfo, struct mbuf ** mpkt)
 	/* Append other information if necessary
 	 */
 	switch (type) {
+
+	/* y5er */
+	/* append the ip header */
+	case MAPM_MISS_EID:
+
+	  if ( (*mpkt) == NULL) {
+	                m_freem(m);
+			return (NULL);
+		};
+
+		switch ((mapinfo->mapi_info[MAPX_EID])->ss_family) {
+
+		case AF_INET:
+	                dlen = sizeof(struct ip);
+			(*mpkt) = m_pullup((*mpkt), dlen);
+			m_append(m, dlen, mtod((*mpkt), c_caddr_t));
+			len += dlen;
+			break;
+
+		};
+#ifdef INET6
+		case AF_INET6:
+	                dlen = sizeof(struct ip6_hdr);
+			(*mpkt) = m_pullup((*mpkt), dlen);
+			m_append(m, dlen, mtod((*mpkt), c_caddr_t));
+			len += dlen;
+			break;
+#endif /* INET6 */
+
+		break;
+		/* y5er */
 
 	case MAPM_MISS_HEADER:
 
