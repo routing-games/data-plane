@@ -1413,6 +1413,10 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 }  /* map_setrlocs */
 
 
+/*y5er*/
+/* map_set_srcdst_locs */
+// modify from the map_setrlocs function above to support EC
+/*y5er*/
 
 static int
 map_fixchange(struct radix_node *rn, void *vp)

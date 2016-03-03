@@ -145,6 +145,14 @@ struct rloc_mtx {           /* GgX - Metrics associated to the RLOC
         struct nonce_type rx_nonce; /* Nonce to be used when receiving a
 				     * LISP encapsulated packet to the RLOC.
 				     */
+        /* y5er */
+        uint32_t src_loc_count ; /* The number of source locator followed
+         	 	 	 * this field only valid for map cache
+         	 	 	 * where destination locator could have
+         	 	 	 * a list of prefered source locator
+         	 	 	 * only consider this field when the RLOCF_HAVE_SRC is ON
+         	 	 	 */
+        /* y5er */
 
 };
 
@@ -155,7 +163,10 @@ struct rloc_mtx {           /* GgX - Metrics associated to the RLOC
 				 */
 #define RLOCF_TXNONCE     0x04    /* RLOC Tx Nonce present. */ 
 #define RLOCF_RXNONCE     0x08    /* RLOC Rx Nonce present. */ 
-
+/* y5er */
+#define RLOCF_HAVE_SRC    0x03   /* Source locator present on this RLOC  */
+#define RLOCF_SRC_LOC     0x05   /* RLOC id a source locator */
+ /* y5er */
 struct rloc_metrics {
 
 	u_long	 rlocmtx_locks;/* Kernel must leave these values alone */
@@ -203,8 +214,42 @@ struct weight_rloc_chain {
 	struct weight_rloc *wr;//list of rloc will be use for encap, last rloc will be point to first, make a ring
 	struct weight_rloc *cwr; //next rloc will be use
 };
-
 /*DPC*/
+
+/* y5er */
+// Define new data structure for egress control, coupling source and destination locator
+
+// this chain is an extended version of weight_rloc
+// it is a chain of destination locators
+// each locator (in a chain) has assigned weight and followed by a list of weight locator
+// list of weight locator we mentioned here is a list of weight source locator
+struct extended_weight_locator {
+	struct locator *rloc;
+	struct weight_locator *next;
+	struct weight_rloc_chain load_balancing_tbl;
+	// include another chain of weight_rloc
+	// if this locator is destination locator, then it includes a chain of source locator
+	// if this locator is source locator, then it includes a chain of destination locator
+	// using weight_rloc_chain instead of weight_rloc for load balancing purpose
+	// we do load balancing among the locators in this chain
+	uint8_t weight;
+
+};
+
+// implement load balancing among extended_weight_locator
+// actually this is not a chain (consider renaming)
+// it is a structure that hold two references to the chain(more precisely the ring)
+// one always point to the first locator in the chain(represented for the chain)
+// the second point to the locator that is currently used for encapsulation
+// after encapsulation this pointer point to next locator in the chain
+// the purpose of this structure is to handle loadbalancing
+struct extended_weight_locator_chain
+{
+	struct extended_weight_locator *wr; //chain of weight locator
+	struct extended_weight_locator *cwr;//current locator that being used for encapsulation
+};
+/* y5er */
+
 struct mapentry {
 	struct	radix_node map_nodes[2];    /* tree glue, and other values */
 	/* GgX - From original code:
@@ -239,6 +284,10 @@ struct mapentry {
 	/*PCD*/
 	struct weight_rloc_chain load_balanc_tbl;
 	/*DPC*/
+
+	/*y5er*/
+	struct extended_weight_locator_chain load_balancing_ring;
+	/*y5er*/
 };
 
 
@@ -315,7 +364,9 @@ struct map_msghdr {
 #define MAPM_LOCALSTALE    0x0A  /* Local Map Version is stale */
 #define MAPM_REMOTESTALE   0x0B  /* Remote Map Version is stale */
 #define MAPM_NONCEMISMATCH 0x0C  /* Rceived a mismatching nonce */
-
+/* y5er */
+#define MAPM_ADD_EC 	   0x0D  /* Map add message with including Egress control parameters */
+/* y5er */
 
 /* Sysctl missmsg state definition
  */
