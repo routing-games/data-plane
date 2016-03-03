@@ -146,7 +146,8 @@ struct rloc_mtx {           /* GgX - Metrics associated to the RLOC
 				     * LISP encapsulated packet to the RLOC.
 				     */
         /* y5er */
-        uint32_t src_loc_count ; /* The number of source locator followed
+        // uint32_t src_loc_count ;
+        			/* The number of source locator followed
          	 	 	 * this field only valid for map cache
          	 	 	 * where destination locator could have
          	 	 	 * a list of prefered source locator
