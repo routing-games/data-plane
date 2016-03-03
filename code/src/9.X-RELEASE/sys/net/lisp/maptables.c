@@ -1390,7 +1390,13 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 					     * Just reset it.
 					     */
 		  cp += sizeof(struct nonce_type);
-
+		  /*y5er*/
+		  // after last nonce is the 32bit value of src_loc_count
+		  // the message has been extended to support EC
+		  // the normal messages have src_loc_count = 0
+		  rmtx.src_loc_count = *(uint32_t *)cp;
+		  cp += sizeof(uint32_t);
+		  /*y5er*/
 		  if ((error = map_insertrloc( &lc, ss, &rmtx))) {
 		           /* Free already allocated RLOCs then return
 			    */
