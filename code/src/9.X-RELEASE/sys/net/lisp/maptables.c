@@ -1359,16 +1359,19 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
  * Locator Status Bits String 
  */
 {
-        int rlocs_counter = rlocs_ct;
+    int rlocs_counter = rlocs_ct;
 	struct locator_chain* lc = NULL;
 	char * cp =  (char *) rlocs;
 	struct rloc_mtx rmtx;
 	struct sockaddr_storage * ss;
 	int error = 0;
-	
+	/* y5er */
+	int src_loc_count = 0;
+	struct sockaddr_storage * src_ss;
+	/* y5er */
 	while (rlocs_counter--) {
 	  
-	          ss = (struct sockaddr_storage *)cp;
+	      ss = (struct sockaddr_storage *)cp;
 		  cp += SS_SIZE(ss);
 		  rmtx.priority = *(uint8_t *)cp++;
 		  rmtx.weight =  *(uint8_t *)cp++;
@@ -1390,13 +1393,39 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 					     * Just reset it.
 					     */
 		  cp += sizeof(struct nonce_type);
+
 		  /*y5er*/
 		  // after last nonce is the 32bit value of src_loc_count
 		  // the message has been extended to support EC
 		  // the normal messages have src_loc_count = 0
 		  rmtx.src_loc_count = *(uint32_t *)cp;
+		  src_loc_count =  rmtx.src_loc_count;
 		  cp += sizeof(uint32_t);
+
+		  // loop through all the source locator
+		  if (src_loc_count){
+			  while (src_loc_count--) {
+				  // now skip all the source locator
+				  // latter try to insert also the source locator
+				  src_ss = (struct sockaddr_storage *)cp;
+				  cp += SS_SIZE(ss);
+				  //rmtx.priority = *(uint8_t *)cp++;
+				  cp += sizeof(uint8_t);
+				  //rmtx.weight =  *(uint8_t *)cp++;
+				  cp += sizeof(uint8_t);
+				  //rmtx.flags =  *(uint16_t *)cp;
+				  cp += sizeof(uint16_t);
+				  //rmtx.mtu =  *(uint32_t *)cp;
+				  cp += sizeof(uint32_t);
+				  cp += sizeof(struct nonce_type);
+				  cp += sizeof(struct nonce_type);
+				  cp += sizeof(uint32_t);
+			  };
+		  }
+		  // need to carefully consider to insert node first, then process and insert the source locator into the same node ????
+		  // how to know which node is inserted ?
 		  /*y5er*/
+
 		  if ((error = map_insertrloc( &lc, ss, &rmtx))) {
 		           /* Free already allocated RLOCs then return
 			    */
