@@ -272,8 +272,8 @@ struct mapentry {
 					*/ 
         uint16_t pad;                  /* Just to keep 32 bits alignment.
 					*/
-	u_long	 map_flags;		/* local/remote? */
-	long	 map_refcnt;		/* # held references */
+        u_long	 map_flags;		/* local/remote? */
+        long	 map_refcnt;		/* # held references */
         time_t   map_lastused;          /* When the mapping has been used
 					 * last time
 					 */
@@ -304,14 +304,12 @@ struct eidmap {
 #define	MAPF_DB	        0x001	/* Mapping is part of the Database */
 #define	MAPF_VERSIONING	0x002	/* Mapping uses Versioning */
 #define	MAPF_LOCBITS	0x004	/* Mapping uses LocStatus bits */
-#define MAPF_STATIC	0x008	/* manually added */
-#define	MAPF_UP		0x010	/* Mapping usable */
-#define	MAPF_ALL	0x020	/* Operation concerns both DB and Cache */
+#define MAPF_STATIC		0x008	/* manually added */
+#define	MAPF_UP			0x010	/* Mapping usable */
+#define	MAPF_ALL		0x020	/* Operation concerns both DB and Cache */
 #define MAPF_EXPIRED    0x040   /* Not used for more than XPGTO time */
-#define MAPF_NEGATIVE   0x080   /* Negative Mapping (no RLOCs forward 
-				 * natively)
-				 */
-#define MAPF_DONE	0x100	/* message confirmed */
+#define MAPF_NEGATIVE   0x080   /* Negative Mapping (no RLOCs forward natively) */
+#define MAPF_DONE		0x100	/* message confirmed */
 
 
 /*
@@ -333,15 +331,20 @@ struct	mappingstats {
  * Structures for routing messages.
  */
 struct map_msghdr {
-	uint8_t	 map_msglen;	/* to skip over non-understood messages */
+	/* y5er */
+	uint32_t	 map_msglen;    // extend the field to allow higher value for message length
+	// now the max lenght allowed is just 2^8=256 bits
+	uint8_t	 	map_resv;	// 8-bit for 32-bit alignment
+	/* y5er */
+	//uint8_t	 map_msglen;	/* to skip over non-understood messages */
 	uint8_t	 map_version;   /* future binary compatibility */
 	uint16_t map_type;	/* message type */
 
 	uint32_t map_flags;	/* flags, incl. kern & message, e.g. DONE */
 	uint16_t map_addrs;	/* bitmask identifying sockaddrs in msg */
-        uint16_t map_versioning;/* Mapping Version Number */
+    uint16_t map_versioning;/* Mapping Version Number */
 
-        int     map_rloc_count;/* Number of rlocs appended to the msg */
+    int     map_rloc_count;/* Number of rlocs appended to the msg */
 	pid_t	map_pid;	/* identify sender */
 	int	map_seq;	/* for sender to identify action */
 	int	map_errno;	/* why failed */
@@ -353,20 +356,20 @@ struct map_msghdr {
 /*
  * Message types.
  */
-#define MAPM_ADD	   0x01	 /* Add Map */
-#define MAPM_DELETE	   0x02	 /* Delete Map */
-#define MAPM_CHANGE	   0x03	 /* Change Mapping (not yet implemented) */
-#define MAPM_GET 	   0x04	 /* Get matching mapping */
-#define MAPM_MISS          0x05  /* Lookup Failed  (general case) */
-#define MAPM_MISS_EID      0x06  /* Lookup Failed  and EID returned */
-#define MAPM_MISS_HEADER   0x07  /* Lookup Failed  and IP header returned */
-#define MAPM_MISS_PACKET   0x08  /* Lookup Failed  and Packet returned */
-#define MAPM_LSBITS        0x09  /* Locator Status Bits Changed */
-#define MAPM_LOCALSTALE    0x0A  /* Local Map Version is stale */
-#define MAPM_REMOTESTALE   0x0B  /* Remote Map Version is stale */
-#define MAPM_NONCEMISMATCH 0x0C  /* Rceived a mismatching nonce */
+#define MAPM_ADD			0x01	/* Add Map */
+#define MAPM_DELETE	   		0x02	/* Delete Map */
+#define MAPM_CHANGE	   		0x03	/* Change Mapping (not yet implemented) */
+#define MAPM_GET 	   		0x04	/* Get matching mapping */
+#define MAPM_MISS          	0x05  	/* Lookup Failed  (general case) */
+#define MAPM_MISS_EID      	0x06  	/* Lookup Failed  and EID returned */
+#define MAPM_MISS_HEADER   	0x07  	/* Lookup Failed  and IP header returned */
+#define MAPM_MISS_PACKET   	0x08  	/* Lookup Failed  and Packet returned */
+#define MAPM_LSBITS        	0x09  	/* Locator Status Bits Changed */
+#define MAPM_LOCALSTALE    	0x0A  	/* Local Map Version is stale */
+#define MAPM_REMOTESTALE   	0x0B  	/* Remote Map Version is stale */
+#define MAPM_NONCEMISMATCH 	0x0C  	/* Rceived a mismatching nonce */
 /* y5er */
-#define MAPM_ADD_EC 	   0x0D  /* Map add message with including Egress control parameters */
+#define MAPM_ADD_EC 	   	0x0D  	/* Map add message with including Egress control parameters */
 /* y5er */
 
 /* Sysctl missmsg state definition
@@ -391,17 +394,17 @@ struct map_msghdr {
 /*
  * Bitmask values for map_addrs.
  */
-#define MAPA_EID	0x01	 /* EID sockaddr present */
+#define MAPA_EID		0x01	 /* EID sockaddr present */
 #define MAPA_EIDMASK	0x02	 /* netmask sockaddr present */
-#define MAPA_RLOC	0x04	 /* Locator present */
+#define MAPA_RLOC		0x04	 /* Locator present */
 
 /*
  * Index offsets for sockaddr array for alternate internal encoding.
  */
-#define MAPX_EID	0	 /* EID sockaddr present */
+#define MAPX_EID		0	 /* EID sockaddr present */
 #define MAPX_EIDMASK	1	 /* EIDmask sockaddr present */
-#define MAPX_RLOC	2	 /* RLOC sockaddr present */
-#define MAPX_MAX	3	 /* size of array to allocate */
+#define MAPX_RLOC		2	 /* RLOC sockaddr present */
+#define MAPX_MAX		3	 /* size of array to allocate */
 
 struct map_addrinfo {
 	int	 mapi_addrs;
@@ -411,7 +414,7 @@ struct map_addrinfo {
          * the pointer to a locator_chain struct
 	 */
         uint32_t mapi_rloc_count; /* Number of rlocs */   
-	int	 mapi_flags;
+        int	 mapi_flags;
         uint16_t mapi_versioning; /* Map Versioning Number */
 
         uint16_t pad;             /* Not used. It just keeps the whole 
