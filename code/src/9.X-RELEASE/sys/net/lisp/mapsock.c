@@ -355,15 +355,15 @@ map_sockaddr(struct socket *so, struct sockaddr **nam)
 static struct pr_usrreqs map_usrreqs = {
 	.pru_abort =		map_abort,
 	.pru_attach =		map_attach,
-	.pru_bind =		map_bind,
+	.pru_bind =			map_bind,
 	.pru_connect =		map_connect,
 	.pru_detach =		map_detach,
 	.pru_disconnect =	map_disconnect,
 	.pru_peeraddr =		map_peeraddr,
-	.pru_send =		map_send,
+	.pru_send =			map_send,
 	.pru_shutdown =		map_shutdown,
 	.pru_sockaddr =		map_sockaddr,
-	.pru_close =            map_close,
+	.pru_close =      	map_close,
 };
 
 
@@ -478,8 +478,7 @@ map_output(struct mbuf *m, struct socket *so)
 	         senderr(EINVAL);
 	};
 
-       /* Checks if the eidmask is already in the radix 
-	*/
+   /* Checks if the eidmask is already in the radix */
 //	if (mapinfo.mapi_info[MAPX_EIDMASK]) {
 //	        struct radix_node *t;
 //		t = rn_addmask((caddr_t) mapinfo.mapi_info[MAPX_EIDMASK], 0, 1);
@@ -511,7 +510,7 @@ map_output(struct mbuf *m, struct socket *so)
 		error = maprequest(MAPM_ADD, &mapinfo, &saved_mapentry);
 		
 		if (error == 0 && saved_mapentry) {
-		        MAP_LOCK(saved_mapentry);
+			MAP_LOCK(saved_mapentry);
 			MAP_REMREF(saved_mapentry);
 			MAP_UNLOCK(saved_mapentry);
 		};

@@ -1220,6 +1220,117 @@ order_addr(struct sockaddr_storage * saddr1, struct sockaddr_storage * saddr2)
 
 } /* cmp_addr() */
 
+/*y5er*/
+static int
+map_insertrloc_withsrc(rlocchain, rlocaddr, rlocmtx, srclocchain)
+     struct locator_chain ** rlocchain;
+     struct sockaddr_storage * rlocaddr;
+     struct rloc_mtx * rlocmtx;
+     struct src_locator_chain *srclocchain;
+/*
+ * Inserts a new rloc into a locator_chain ordered by priority and weigth
+ * and address if necessary.
+ */
+{
+    struct locator_chain * newrloc, * rcp, * rcpp;
+    struct sockaddr_storage * newrlocaddr;
+	int diff = 1;
+
+	R_Zalloc(newrloc, struct locator_chain *, sizeof(struct locator_chain));
+
+	if (newrloc == NULL)
+		return(ENOBUFS);
+
+	bzero(newrloc, sizeof(struct locator_chain));
+
+	bcopy(rlocmtx, &(newrloc->rloc.rloc_metrix.rlocmtx),sizeof(struct rloc_mtx));
+
+	R_Zalloc(newrlocaddr, struct sockaddr_storage *, SS_SIZE(rlocaddr));
+
+	if (newrlocaddr == NULL) {
+		Free(newrloc);
+		return(ENOBUFS);
+	};
+
+	bcopy(rlocaddr, newrlocaddr, SS_SIZE(rlocaddr));
+	newrloc->rloc.rloc_addr = newrlocaddr;
+
+	/*y5er*/
+	// include the source locator chain to this rloc (destination locator)
+	// we already create the chain when parsing the message
+	// we dont do the same way as the newrloacaddr
+	// since from the message, the socket structure already presented so we can use pointer to refer to it
+	// while the chain is not available in the message, we need to parse and construct
+	if ( srclocchain == NULL )
+	{
+		Free(newrloc);
+		return(ENOBUFS);
+	}
+	newrloc->rloc.src_loc_chain = srclocchain;
+	/*y5er*/
+
+	rcp = *rlocchain;
+
+	/* GgX - Before inserting Check for duplicates
+	 * This is not efficient. If we see a lots of RLOCs for one
+	 * EID prefix we should change this.
+	 */
+	while ( rcp && diff) {
+
+	        if ( rcp->rloc.rloc_addr->ss_family == newrloc->rloc.rloc_addr->ss_family)
+		  diff = bcmp(rcp->rloc.rloc_addr, newrloc->rloc.rloc_addr, SS_SIZE(rcp->rloc.rloc_addr));
+	        else
+		        diff = 1;
+
+	        rcp = rcp->next;
+	};
+
+	if (!diff) {
+	        Free(newrlocaddr);
+		Free(newrloc)
+
+#ifdef LISP_DEBUG
+		DEBUGLISP("[MAP_INSERTRLOC] Duplicate RLOCs ! \n");
+#endif /* LISP_DEBUG */
+
+	        return(EINVAL);
+	};
+
+	rcpp = rcp = *rlocchain;
+
+        while ( rcp &&
+		(rcp->rloc.rloc_metrix.rlocmtx.priority < newrloc->rloc.rloc_metrix.rlocmtx.priority
+		 || (rcp->rloc.rloc_metrix.rlocmtx.priority == newrloc->rloc.rloc_metrix.rlocmtx.priority
+		     && order_addr(rcp->rloc.rloc_addr,newrloc->rloc.rloc_addr) ))) {
+
+	        rcpp = rcp;
+	        rcp = rcp->next;
+
+	};
+
+        if (rcp == NULL) {
+	    /* Either we are queuing at the end of the list
+		* or it is the first one
+		*/
+	        if (rcpp)
+		        rcpp->next = newrloc;
+	        else
+	        	*rlocchain = newrloc;
+        } else {
+	        if (rcp == rcpp) {
+	        /* We are at the head of the chain */
+		        *rlocchain = newrloc;
+		        newrloc->next = rcp;
+	        } else {
+	            newrloc->next = rcp;
+		        rcpp->next = newrloc;
+	        }
+        };
+
+        return(0);
+
+} /* map_appendrloc */
+/*end y5er*/
 
 static int
 map_insertrloc(rlocchain, rlocaddr, rlocmtx)
@@ -1295,24 +1406,23 @@ map_insertrloc(rlocchain, rlocaddr, rlocmtx)
 	};
 
         if (rcp == NULL) {
-	       /* Either we are queuing at the end of the list
+	    /* Either we are queuing at the end of the list
 		* or it is the first one 
 		*/ 
 	        if (rcpp)
 		        rcpp->next = newrloc;
-		else 
-	                *rlocchain = newrloc;
-	} else {
+	        else
+	        	*rlocchain = newrloc;
+        } else {
 	        if (rcp == rcpp) {
-	               /* We are at the head of the chain 
-			*/
+	        /* We are at the head of the chain */
 		        *rlocchain = newrloc;
-			newrloc->next = rcp;
-		} else {
-	                newrloc->next = rcp;
+		        newrloc->next = rcp;
+	        } else {
+	            newrloc->next = rcp;
 		        rcpp->next = newrloc;
-		}
-  	};
+	        }
+        };
 	
         return(0);
 
@@ -1389,9 +1499,7 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 		          rmtx.tx_nonce.nvalue = (htonl( ((struct nonce_type *)cp)->nvalue & NONCEMASK)) >> 8;
 		  };
 		  cp += sizeof(struct nonce_type);
-		  rmtx.rx_nonce.nvalue = 0; /* Received nonce cannot be set.
-					     * Just reset it.
-					     */
+		  rmtx.rx_nonce.nvalue = 0; /* Received nonce cannot be set. Just reset it.*/
 		  cp += sizeof(struct nonce_type);
 
 		  /*y5er*/
@@ -1402,37 +1510,115 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 		  src_loc_count =  rmtx.src_loc_count;
 		  cp += sizeof(uint32_t);
 
-		  // loop through all the source locator
+		  // loop through all the source locators
 		  if (src_loc_count){
+			  // create the source locator chain
+			  struct src_locator_chain *srcloc_chain = NULL;
+			  // how about if we not using pointer ?
+			  struct src_locator_chain *rcp, *rcpp;
+
+			  R_Zalloc(srcloc_chain,struct src_locator_chain *,sizeof(struct src_locator_chain));
+			  if (new_srcloc == NULL)
+				  return (ENOBUFS);
+			  bzero (srcloc_chain,sizeof(struct src_locator_chain));
+
 			  while (src_loc_count--) {
-				  // now skip all the source locator
-				  // latter try to insert also the source locator
+
+				  struct src_locator_chain *new_srcloc;
+				  struct sockaddr_storage *new_srcloc_addr;
+
+				  R_Zalloc(new_srcloc,struct src_locator_chain *,sizeof(struct src_locator_chain));
+				  if (new_srcloc == NULL)
+					  return (ENOBUFS);
+				  bzero (new_srcloc,sizeof(struct src_locator_chain));
+
+				  // get the source locator address from the message
 				  src_ss = (struct sockaddr_storage *)cp;
-				  cp += SS_SIZE(ss);
-				  //rmtx.priority = *(uint8_t *)cp++;
-				  cp += sizeof(uint8_t);
-				  //rmtx.weight =  *(uint8_t *)cp++;
-				  cp += sizeof(uint8_t);
+				  // add to the new source locator chain
+				  // + first allocate memory,
+				  R_Zalloc(new_srcloc_addr, struct sockaddr_storage *,SS_SIZE(src_ss));
+				  // + check for error
+				  if ( new_srcloc_addr == NULL )
+				  {
+					  //Free(new_srcloc);
+					  return (ENOBUFS );
+				  }
+				  // + get data from the message to new allocated socket address
+				  bcopy (src_ss, new_srcloc_addr, SS_SIZE(src_ss));
+				  // + add to the locator in the chain
+				  new_srcloc->src_loc.src_loc_addr = new_srcloc_addr;
+
+				  // continue parsing the message
+				  cp += SS_SIZE(src_ss);  // cp now point to priority
+				  // currently we are not using priority, just skip it
+				  // rmtx.priority = *(uint8_t *)cp++;
+				  cp += sizeof(uint8_t); // cp now point to weight
+				  new_srcloc->weight = *(uint8_t *)cp;
+				  new_srcloc->src_loc.src_loc_weight = *(uint8_t *)cp;
+				  // rmtx.weight  = *(uint8_t *)cp++;
+				  cp += sizeof(uint8_t); // cp point to flag
 				  //rmtx.flags =  *(uint16_t *)cp;
-				  cp += sizeof(uint16_t);
+				  cp += sizeof(uint16_t); // cp point to mtu
 				  //rmtx.mtu =  *(uint32_t *)cp;
 				  cp += sizeof(uint32_t);
 				  cp += sizeof(struct nonce_type);
 				  cp += sizeof(struct nonce_type);
 				  cp += sizeof(uint32_t);
+				  // add the new constructed locator new_srcloc to the locator chain srcloc_chain
+				  rcp = rcpp = srcloc_chain;
+				  // find the correct position to add
+				  while ( rcp && rcp->weight < new_srcloc.weight)
+				  {
+					  rcpp = rcp;
+					  rcp = rcp->next;
+				  };
+				  // insert the new src loc to the chain
+				  if ( rcp == NULL ) // two case could happened
+				  {
+					  if ( rcpp ) // last element in the chain
+						  rcpp->next = new_srcloc;
+					  else // the chain is newly construct without any elements
+						  srcloc_chain = new_srcloc;
+				  }
+				  else // rcp != NULL
+				  {
+					  if ( rcp == rcpp ){ // head of the chain (the chain is not empty as the previous case)
+						  srcloc_chain = new_srcloc;
+						  new_srcloc->next = rcp;
+					  }else { // in the middle of the current chain
+						  new_srcloc->next = rcp;
+						  rcpp->next = new_srcloc;
+					  }
+				  }
+
+			  };
+
+			  if ((error = map_insertrloc_withsrc( &lc, ss, &rmtx, srcloc_chain))) {
+				  //Free already allocated RLOCs then return
+				  FreeRloc(*rlocs_chain);
+				  return(error);
+			  };
+
+		  }
+		  else  // if there is no src_loc_count, so just insert as normal
+		  {
+			  if ((error = map_insertrloc( &lc, ss, &rmtx))) {
+				  //Free already allocated RLOCs then return
+				  FreeRloc(*rlocs_chain);
+				  return(error);
 			  };
 		  }
 		  // need to carefully consider to insert node first, then process and insert the source locator into the same node ????
 		  // how to know which node is inserted ?
 		  /*y5er*/
 
+		  /*
 		  if ((error = map_insertrloc( &lc, ss, &rmtx))) {
-		           /* Free already allocated RLOCs then return
-			    */
+		            //Free already allocated RLOCs then return
 		            FreeRloc(*rlocs_chain);
 		            return(error);
 		  };         	  
-		  
+		   */
 
 	};
 

@@ -172,7 +172,7 @@ struct rloc_metrics {
 
 	u_long	 rlocmtx_locks;/* Kernel must leave these values alone */
 
-        struct rloc_mtx rlocmtx; /* GgX -  Metrics     */
+    struct rloc_mtx rlocmtx; /* GgX -  Metrics     */
 
 	u_long	rloc_hit; /* Number of times this RLOC has been selected */
 
@@ -184,6 +184,19 @@ struct rloc_metrics {
  * and a reference to a LISP entry. The LISP entry is a set of RLOCs.
  */
 
+/*y5er*/
+struct src_locator {
+	struct sockaddr_storage *src_loc_addr;
+	uint8_t src_loc_weight; // this is the original weight which will not be changed
+};
+
+struct src_locator_chain {
+	struct src_locator src_loc;
+	struct src_locator_chain *next;
+	uint8_t weight; // this weight will be used for loadbalancing purpose
+};
+/*end y5er*/
+
 /* GgX - An RLOC is either an IPv6 or an IPv4 full ip address.
  * This is why a sockaddr_storage is used.
  * 
@@ -191,6 +204,9 @@ struct rloc_metrics {
 struct locator {
         struct sockaddr_storage * rloc_addr;
         struct rloc_metrics rloc_metrix;
+        /*y5er*/
+        struct src_locator_chain *src_loc_chain;
+        /*y5er*/
 };
 
 
