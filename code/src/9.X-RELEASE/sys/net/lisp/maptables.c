@@ -363,9 +363,9 @@ map_select_srcrloc(dbmap, drloc,  srloc)
  * outgoing interface and the AF of the destination RLOC.
  */
 {
-        struct route_in6 ip6_rt;
+    struct route_in6 ip6_rt;
 	struct sockaddr_storage out_ifa;
-        struct in_ifaddr * ia = NULL;
+    struct in_ifaddr * ia = NULL;
 	struct ifnet *ifp = NULL;
 	struct rtentry *rt = NULL;
 	struct sockaddr_in6 ip6_dst;
@@ -373,24 +373,31 @@ map_select_srcrloc(dbmap, drloc,  srloc)
 	int in6_local;
 	in6_local = 0;
 	/*DPC*/
+	/*y5er*/
+	int srcloc_count = 0;
+	srcloc_count = drloc->rloc.rloc_metrix.rlocmtx.src_loc_count;
+	struct sockaddr_storage *src_locaddr;
+	src_locaddr = drloc->src_loc_chain.src_loc.src_loc_addr;
+	int egress_control = 0;
+	if ( src_locaddr != NULL && srcloc_count )
+		egress_control = 1;
+	/*y5er*/
+
 	bzero( &out_ifa, sizeof(struct sockaddr_storage) );
 
 	switch (drloc->rloc_addr->ss_family) {
 
 	case AF_INET:
 
-	        ia = ip_rtaddr( *((struct in_addr *) 
+		ia = ip_rtaddr( *((struct in_addr *)
 				  &(((struct sockaddr_in *)drloc->rloc_addr)->sin_addr)), 0);
-	       /* XXX - 0 is the default FIB
-		*/
+		/* XXX - 0 is the default FIB */
 
 		if (ia == NULL) {  /* No output interface == no route */
-		  
-		        return ENOATTR;
-	  
+			return ENOATTR;
 		};
 
-                out_ifa.ss_family = AF_INET;
+		out_ifa.ss_family = AF_INET;
 		out_ifa.ss_len = sizeof(struct sockaddr_in);
 		((struct sockaddr_in *)&out_ifa)->sin_addr =  IA_SIN(ia)->sin_addr;
 
@@ -398,24 +405,19 @@ map_select_srcrloc(dbmap, drloc,  srloc)
 
 	case AF_INET6:
 	  
-	        bzero( &ip6_rt, sizeof(struct route_in6) );
+		bzero( &ip6_rt, sizeof(struct route_in6) );
 
 		bzero( &ip6_dst, sizeof(struct sockaddr_in6) );
 		ip6_dst.sin6_len = sizeof(struct sockaddr_in6);
 		ip6_dst.sin6_family = AF_INET6;
 		ip6_dst.sin6_addr = *((struct in6_addr *)&(((struct sockaddr_in6 *)drloc->rloc_addr)->sin6_addr));
 
-		if ((in6_selectroute(&ip6_dst, NULL, NULL, &ip6_rt,
-				     &ifp, &rt)) != 0) {
- 		  
-		        return ENOATTR;
-		
+		if ((in6_selectroute(&ip6_dst, NULL, NULL, &ip6_rt,&ifp, &rt)) != 0) {
+			return ENOATTR;
 		};
 
 		if ( rt == NULL )  { /* No route to Destination RLOC */
-		  
-		        return ENOATTR;
-		
+			return ENOATTR;
 		};
 		/*PCD*/
 		//bcopy( rt->rt_ifa, &out_ifa, 
@@ -430,37 +432,57 @@ map_select_srcrloc(dbmap, drloc,  srloc)
 		break;
 
 	default:
-		        /* This should really never happen!
-			 */
+		        /* This should really never happen! */
 		         panic("[MAP_SELECT_SRCRLOC] AF Not Supported!");
 	};
 
-        struct locator_chain * lc = dbmap->rlocs;
-	
-	/*PCD*/
-	 while( lc && (
-					   !(lc->rloc.rloc_addr->ss_family == drloc->rloc_addr->ss_family)
-					|| !(lc->rloc.rloc_metrix.rlocmtx.flags & RLOCF_UP )
-					|| !(lc->rloc.rloc_metrix.rlocmtx.flags & RLOCF_LIF)
-					|| !(lc->rloc.rloc_metrix.rlocmtx.priority < MAX_RLOC_PRI)
-					|| (!in6_local && memcmp( &out_ifa, lc->rloc.rloc_addr, SS_SIZE(lc->rloc.rloc_addr)))
-					)
-	){
+	struct locator_chain * lc = dbmap->rlocs;
 
-	/* while (lc 
-	       && !(lc->rloc.rloc_addr->ss_family == drloc->rloc_addr->ss_family)
-	       && !(lc->rloc.rloc_metrix.rlocmtx.flags & (RLOCF_UP | RLOCF_LIF))
-	       && (lc->rloc.rloc_metrix.rlocmtx.priority < MAX_RLOC_PRI)
-	       && (memcmp( &out_ifa, lc->rloc.rloc_addr, SS_SIZE(lc->rloc.rloc_addr)))) { */
-	       /* Scan the chain and pick the first that:
-		* - Has the same AF
-		* - Is a local address 
-		* - Has a valid priority (i.e. less than 255)
-		* - Is the address of the ooutgoing interface
-		*/
-	        lc = lc->next;
-	};
-	/*DPC*/
+	/*y5er*/
+	// need to define a better control here
+	// prioritize looking up in the source locator chain of the destination locator
+	// however, when not found, using the legagy method --- (now for testing we only use one method )
+	if ( egress_control ) {
+		while( lc && (
+				   !(lc->rloc.rloc_addr->ss_family == drloc->rloc_addr->ss_family)
+				|| !(lc->rloc.rloc_metrix.rlocmtx.flags & RLOCF_UP )
+				|| !(lc->rloc.rloc_metrix.rlocmtx.flags & RLOCF_LIF)
+				|| !(lc->rloc.rloc_metrix.rlocmtx.priority < MAX_RLOC_PRI)
+				|| (!in6_local && memcmp( src_locaddr, lc->rloc.rloc_addr, SS_SIZE(lc->rloc.rloc_addr)))
+				)
+		){
+
+				lc = lc->next;
+		};
+	}
+	else {
+		/*PCD*/
+		 while( lc && (
+						   !(lc->rloc.rloc_addr->ss_family == drloc->rloc_addr->ss_family)
+						|| !(lc->rloc.rloc_metrix.rlocmtx.flags & RLOCF_UP )
+						|| !(lc->rloc.rloc_metrix.rlocmtx.flags & RLOCF_LIF)
+						|| !(lc->rloc.rloc_metrix.rlocmtx.priority < MAX_RLOC_PRI)
+						|| (!in6_local && memcmp( &out_ifa, lc->rloc.rloc_addr, SS_SIZE(lc->rloc.rloc_addr)))
+						)
+		){
+
+		/* while (lc
+			   && !(lc->rloc.rloc_addr->ss_family == drloc->rloc_addr->ss_family)
+			   && !(lc->rloc.rloc_metrix.rlocmtx.flags & (RLOCF_UP | RLOCF_LIF))
+			   && (lc->rloc.rloc_metrix.rlocmtx.priority < MAX_RLOC_PRI)
+			   && (memcmp( &out_ifa, lc->rloc.rloc_addr, SS_SIZE(lc->rloc.rloc_addr)))) { */
+			   /* Scan the chain and pick the first that:
+			* - Has the same AF
+			* - Is a local address
+			* - Has a valid priority (i.e. less than 255)
+			* - Is the address of the ooutgoing interface
+			*/
+				lc = lc->next;
+		};
+		/*DPC*/
+	}
+	/*y5er*/
+	
 	if (lc) {
 
 	        *srloc = &(lc->rloc);
@@ -1330,6 +1352,8 @@ map_insertrloc_withsrc(rlocchain, rlocaddr, rlocmtx, srclocchain)
 		        rcpp->next = newrloc;
 	        }
         };
+        // just for testing purpose
+        printf("call to map_insertrloc_withsrc \n");
 
         return(0);
 
