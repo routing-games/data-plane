@@ -379,7 +379,7 @@ map_select_srcrloc(dbmap, drloc,  srloc)
 	struct sockaddr_storage *src_locaddr;
 	struct src_locator *src_loc;
 
-	src_loc = &(drloc->src_loc_chain.src_loc);
+	src_loc = &(drloc->src_loc_chain->src_loc);
 	src_locaddr = src_loc->src_loc_addr;
 	// src_locaddr = (struct src_loc *)(drloc->src_loc_chain.src_loc)->src_loc_addr );
 	// src_locaddr = drloc->src_loc_chain.src_loc.src_loc_addr;
