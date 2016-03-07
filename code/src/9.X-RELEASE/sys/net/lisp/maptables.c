@@ -112,7 +112,11 @@ static int map_setrlocs(caddr_t *, struct locator_chain **, int,
 			lsbits_type *, int);
 static int map_insertrloc(struct locator_chain **, struct sockaddr_storage *,
 			  struct rloc_mtx *);
-
+/*y5er*/
+static int
+map_insertrloc_withsrc( struct locator_chain **, struct sockaddr_storage *,
+		struct rloc_mtx *, struct src_locator_chain *);
+/*y5er*/
 static void  FreeRloc(struct locator_chain * rlocchain);
 
 static void map_copylsbit(struct locator_chain *, lsbits_type *);
@@ -1513,12 +1517,12 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 		  // loop through all the source locators
 		  if (src_loc_count){
 			  // create the source locator chain
-			  struct src_locator_chain *srcloc_chain = NULL;
+			  struct src_locator_chain *srcloc_chain, *rcp, *rcpp;
 			  // how about if we not using pointer ?
-			  struct src_locator_chain *rcp, *rcpp;
+
 
 			  R_Zalloc(srcloc_chain,struct src_locator_chain *,sizeof(struct src_locator_chain));
-			  if (new_srcloc == NULL)
+			  if (srcloc_chain == NULL)
 				  return (ENOBUFS);
 			  bzero (srcloc_chain,sizeof(struct src_locator_chain));
 
@@ -1540,7 +1544,7 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 				  // + check for error
 				  if ( new_srcloc_addr == NULL )
 				  {
-					  //Free(new_srcloc);
+					  Free(new_srcloc);
 					  return (ENOBUFS );
 				  }
 				  // + get data from the message to new allocated socket address
@@ -1567,7 +1571,7 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 				  // add the new constructed locator new_srcloc to the locator chain srcloc_chain
 				  rcp = rcpp = srcloc_chain;
 				  // find the correct position to add
-				  while ( rcp && rcp->weight < new_srcloc.weight)
+				  while ( rcp && rcp->weight < new_srcloc->weight)
 				  {
 					  rcpp = rcp;
 					  rcp = rcp->next;
