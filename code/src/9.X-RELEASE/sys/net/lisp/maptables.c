@@ -116,6 +116,11 @@ static int map_insertrloc(struct locator_chain **, struct sockaddr_storage *,
 static int
 map_insertrloc_withsrc( struct locator_chain **, struct sockaddr_storage *,
 		struct rloc_mtx *, struct src_locator_chain *);
+int
+set_load_balancing_for_srcloc (struct locator_chain *);
+
+int
+reset_load_balancing_for_srcloc (struct locator_chain *);
 /*y5er*/
 static void  FreeRloc(struct locator_chain * rlocchain);
 
@@ -394,7 +399,7 @@ map_select_srcrloc(dbmap, drloc,  srloc)
 		// the line for source locator and source locator address could also be removed
 		// the logic for load balancing begin here
 		struct src_locator_chain *sloc; // source locator that will be used
-		struct src_locator_chain *n_sloc; // the current source locator, locator that has been used before
+		struct src_locator_chain *c_sloc; // the current source locator, locator that has been used before
 		sloc = c_sloc =  drloc->src_loc_LB_ring.cwr; // point to current used source locator in the ring
 		if ( c_sloc && c_sloc->weight <= 0) // if this has been used up, move to next
 		{
@@ -628,7 +633,7 @@ set_load_balancing_for_srcloc (struct locator_chain * dstloc) {
 	}
 	else
 	{
-		rmap->load_balanc_tbl.wr = rmap->load_balanc_tbl.cwr =  NULL;
+		dest_rloc->src_loc_LB_ring.wr  = dest_rloc->src_loc_LB_ring.cwr =  NULL;
 		return ENOATTR;
 	}
 }
@@ -1391,7 +1396,7 @@ map_insertrloc_withsrc(rlocchain, rlocaddr, rlocmtx, srclocchain)
 	// it is different than the load balancing setting for destination locator
 	// where the chain is different, here we using the same chain structure
 	// since it is simpler, it is better not create a set load balancing function
-	newrloc->rloc.src_loc_LB_ring.cw = srclocchain;
+	newrloc->rloc.src_loc_LB_ring.wr = srclocchain;
 	newrloc->rloc.src_loc_LB_ring.cwr = srclocchain;
 	//call to set_load_balancing_for_srcloc
 	//here we create the load balancing table for te newrloc , before adding it into the chain
