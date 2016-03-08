@@ -379,14 +379,53 @@ map_select_srcrloc(dbmap, drloc,  srloc)
 	struct sockaddr_storage *src_locaddr;
 	struct src_locator *src_loc;
 
-	src_loc = &(drloc->src_loc_chain->src_loc);
-	src_locaddr = src_loc->src_loc_addr;
-	// src_locaddr = (struct src_loc *)(drloc->src_loc_chain.src_loc)->src_loc_addr );
-	// src_locaddr = drloc->src_loc_chain.src_loc.src_loc_addr;
+	src_loc = &(drloc->src_loc_chain->src_loc); // temporary set, remove latter when LB done
+	src_locaddr = src_loc->src_loc_addr; // temporary set, remove latter when LB done
+	// src_locaddr = (struct src_loc *)(drloc->src_loc_chain.src_loc)->src_loc_addr ); [old]
+	// src_locaddr = drloc->src_loc_chain.src_loc.src_loc_addr; [old]
+
 	int egress_control = 0;
 	if ( src_locaddr != NULL && srcloc_count )
+	{
 		egress_control = 1;
-	/*y5er*/
+
+		// we do load balancing for source locator based on the load balancing ring
+		// the line for source locator and source locator address could also be removed
+		// the logic for load balancing begin here
+		struct src_locator_chain *sloc; // source locator that will be used
+		struct src_locator_chain *n_sloc; // the current source locator, locator that has been used before
+		sloc = c_sloc =  drloc->src_loc_LB_ring.cwr; // point to current used source locator in the ring
+		if ( c_sloc && c_sloc->weight <= 0) // if this has been used up, move to next
+		{
+			sloc = c_sloc->next;
+			while  ( (sloc != c_sloc) && (sloc->weight <= 0))  // skip locators that have been used up
+			{
+				sloc = sloc->next;
+			}
+			if ( sloc ==  c_sloc) // if all locator in chain have been used up
+			{
+				reset_load_balancing_for_srcloc(drloc);
+				sloc = drloc->src_loc_LB_ring.wr;
+			}
+		}
+
+		if (sloc)
+		{
+			src_loc = &(sloc->src_loc); // this has been selected as the source locator
+			src_locaddr = src_loc->src_loc_addr;
+
+			sloc->weight = sloc->weight - 1 ; // decrease the weight of used locator
+			drloc->src_loc_LB_ring.cwr = sloc->next; // move pointer to the next locator
+		}
+		// identify the address of source locator will be used for encapsulation
+		// use that to select proper locator from the local db at latter step
+
+		// NEED to add a validation to check the source locator found with the output interface of this router
+		// validation should be do before !!!
+
+	}
+
+		/*y5er*/
 
 	bzero( &out_ifa, sizeof(struct sockaddr_storage) );
 
@@ -447,6 +486,8 @@ map_select_srcrloc(dbmap, drloc,  srloc)
 	// need to define a better control here
 	// prioritize looking up in the source locator chain of the destination locator
 	// however, when not found, using the legagy method --- (now for testing we only use one method )
+
+	// find in the locator chain the locator that have same address as the source locator that we identify before
 	if ( egress_control ) {
 		while( lc && (
 				   !(lc->rloc.rloc_addr->ss_family == drloc->rloc_addr->ss_family)
@@ -567,6 +608,49 @@ map_reset_load_balanc_tbl (struct mapentry *rmap) {
 }
 /*DPC*/
 
+/*y5er*/
+// keep it for later use
+int
+set_load_balancing_for_srcloc (struct locator_chain * dstloc) {
+
+	struct locator  *dest_rloc = &(dstloc->rloc);
+	struct src_locator_chain *lc = dest_rloc->src_loc_chain;
+
+	if (lc)
+	{
+		dest_rloc->src_loc_LB_ring.wr = lc;
+		dest_rloc->src_loc_LB_ring.cwr = lc;
+		return 0;
+	}
+	else
+	{
+		rmap->load_balanc_tbl.wr = rmap->load_balanc_tbl.cwr =  NULL;
+		return ENOATTR;
+	}
+}
+int
+reset_load_balancing_for_srcloc (struct locator_chain * dstloc) {
+
+	struct locator  *dest_rloc = &(dstloc->rloc);
+	struct src_locator_chain *lc = dest_rloc->src_loc_LB_ring.wr;
+	// reset the weight for all locator in the chain
+	if ( lc )
+	{
+		lc->weight = lc->src_loc.src_loc_weight;
+		lc = lc->next;
+		while ( lc != dest_rloc->src_loc_LB_ring.wr )
+		{
+			lc->weight = lc->src_loc.src_loc_weight;
+			lc = lc->next;
+		}
+
+		// reset the cwr to point to the head of the chain wr
+		dest_rloc->src_loc_LB_ring.cwr = dest_rloc->src_loc_LB_ring.wr;
+	}
+
+	return 0;
+}
+/*endy5er*/
 int 
 map_select_dstrloc(rmap, drloc)
       struct mapentry * rmap;
@@ -581,6 +665,7 @@ map_select_dstrloc(rmap, drloc)
 			wr = wr->next;
 		if(wr == swr){
 			map_reset_load_balanc_tbl(rmap);
+
 			wr = rmap->load_balanc_tbl.cwr;
 		}
 	}
@@ -1298,6 +1383,17 @@ map_insertrloc_withsrc(rlocchain, rlocaddr, rlocmtx, srclocchain)
 		return(ENOBUFS);
 	}
 	newrloc->rloc.src_loc_chain = srclocchain;
+
+	// it is different than the load balancing setting for destination locator
+	// where the chain is different, here we using the same chain structure
+	// since it is simpler, it is better not create a set load balancing function
+	newrloc->rloc.src_loc_LB_ring.cw = srclocchain;
+	newrloc->rloc.src_loc_LB_ring.cwr = srclocchain;
+	//call to set_load_balancing_for_srcloc
+	//here we create the load balancing table for te newrloc , before adding it into the chain
+	//the input should be the pointer to newrloc
+	// struct locator_chain * newrloc
+	// set_load_balancing_for_srcloc(newrloc)
 	/*y5er*/
 
 	rcp = *rlocchain;
@@ -1625,7 +1721,7 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 				  }
 
 			  };
-
+			  printf(" number of source locator is %d \n",src_loc_count);
 			  if ((error = map_insertrloc_withsrc( &lc, ss, &rmtx, srcloc_chain))) {
 				  //Free already allocated RLOCs then return
 				  FreeRloc(*rlocs_chain);

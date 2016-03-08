@@ -195,6 +195,12 @@ struct src_locator_chain {
 	struct src_locator_chain *next;
 	uint8_t weight; // this weight will be used for loadbalancing purpose
 };
+
+struct src_locator_LB_ring {
+	struct src_locator_chain *wr;  //chain of source locator used for encap,the last locator is pointed to the first to make a ring
+								   //pointer to first source locator in the chain to keep track of first position
+	struct src_locator_chain *cwr; //pointer to exact src locator that will be used for encapsulation (it is one of locator in the chain)
+};
 /*end y5er*/
 
 /* GgX - An RLOC is either an IPv6 or an IPv4 full ip address.
@@ -206,6 +212,7 @@ struct locator {
         struct rloc_metrics rloc_metrix;
         /*y5er*/
         struct src_locator_chain *src_loc_chain;
+        struct src_locator_LB_ring src_loc_LB_ring; // it is first created here, no pointer
         /*y5er*/
 };
 
