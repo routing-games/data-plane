@@ -389,7 +389,7 @@ map_select_srcrloc(dbmap, drloc,  srloc)
 	// src_locaddr = (struct src_loc *)(drloc->src_loc_chain.src_loc)->src_loc_addr ); [old]
 	// src_locaddr = drloc->src_loc_chain.src_loc.src_loc_addr; [old]
 
-    printf(" select source rloc  \n");
+    // printf(" select source rloc  \n");
 	int egress_control = 0;
 	if ( src_locaddr != NULL && srcloc_count )
 	{
@@ -419,6 +419,8 @@ map_select_srcrloc(dbmap, drloc,  srloc)
 		{
 			src_loc = &(sloc->src_loc); // this has been selected as the source locator
 			src_locaddr = src_loc->src_loc_addr;
+
+			printf(" source rloc found with weight = %d  \n",sloc->weight);
 
 			sloc->weight = sloc->weight - 1 ; // decrease the weight of used locator
 			drloc->src_loc_LB_ring.cwr = sloc->next; // move pointer to the next locator
@@ -507,7 +509,7 @@ map_select_srcrloc(dbmap, drloc,  srloc)
 				lc = lc->next;
 		};
 		if (lc) {
-			printf(" source locator select \n");
+			// printf(" source locator select \n");
 		}
 	}
 	else {
