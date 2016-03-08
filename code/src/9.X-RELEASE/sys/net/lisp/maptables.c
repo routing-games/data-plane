@@ -384,6 +384,7 @@ map_select_srcrloc(dbmap, drloc,  srloc)
 	// src_locaddr = (struct src_loc *)(drloc->src_loc_chain.src_loc)->src_loc_addr ); [old]
 	// src_locaddr = drloc->src_loc_chain.src_loc.src_loc_addr; [old]
 
+    printf(" select source rloc  \n");
 	int egress_control = 0;
 	if ( src_locaddr != NULL && srcloc_count )
 	{
@@ -500,6 +501,9 @@ map_select_srcrloc(dbmap, drloc,  srloc)
 
 				lc = lc->next;
 		};
+		if (lc) {
+			printf(" source locator select \n");
+		}
 	}
 	else {
 		/*PCD*/
