@@ -649,7 +649,7 @@ reset_load_balancing_for_srcloc (struct locator * dstloc) {
 		lc = lc->next;
 		while ( lc != dstloc->src_loc_LB_ring.wr )
 		{
-			lc->weight = lc->dstloc.src_loc_weight;
+			lc->weight = lc->src_loc.src_loc_weight;
 			lc = lc->next;
 		}
 
