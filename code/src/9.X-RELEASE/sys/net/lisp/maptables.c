@@ -120,7 +120,7 @@ int
 set_load_balancing_for_srcloc (struct locator_chain *);
 
 int
-reset_load_balancing_for_srcloc (struct locator_chain *);
+reset_load_balancing_for_srcloc (struct locator *);
 /*y5er*/
 static void  FreeRloc(struct locator_chain * rlocchain);
 
@@ -638,23 +638,23 @@ set_load_balancing_for_srcloc (struct locator_chain * dstloc) {
 	}
 }
 int
-reset_load_balancing_for_srcloc (struct locator_chain * dstloc) {
+reset_load_balancing_for_srcloc (struct locator * dstloc) {
 
-	struct locator  *dest_rloc = &(dstloc->rloc);
-	struct src_locator_chain *lc = dest_rloc->src_loc_LB_ring.wr;
+	//struct locator  *dest_rloc = &(dstloc->rloc);
+	struct src_locator_chain *lc = dstloc->src_loc_LB_ring.wr;
 	// reset the weight for all locator in the chain
 	if ( lc )
 	{
 		lc->weight = lc->src_loc.src_loc_weight;
 		lc = lc->next;
-		while ( lc != dest_rloc->src_loc_LB_ring.wr )
+		while ( lc != dstloc->src_loc_LB_ring.wr )
 		{
-			lc->weight = lc->src_loc.src_loc_weight;
+			lc->weight = lc->dstloc.src_loc_weight;
 			lc = lc->next;
 		}
 
 		// reset the cwr to point to the head of the chain wr
-		dest_rloc->src_loc_LB_ring.cwr = dest_rloc->src_loc_LB_ring.wr;
+		dstloc->src_loc_LB_ring.cwr = dstloc->src_loc_LB_ring.wr;
 	}
 
 	return 0;
