@@ -411,7 +411,7 @@ map_select_srcrloc(dbmap, drloc,  srloc)
 			if ( sloc ==  c_sloc) // if all locator in chain have been used up
 			{
 				reset_load_balancing_for_srcloc(drloc);
-				sloc = drloc->src_loc_LB_ring.wr;
+				sloc = drloc->src_loc_LB_ring.cwr;
 			}
 		}
 
@@ -508,9 +508,11 @@ map_select_srcrloc(dbmap, drloc,  srloc)
 
 				lc = lc->next;
 		};
-		if (lc) {
-			// printf(" source locator select \n");
-		}
+		if (lc)
+			printf(" found source rloc \n");
+		else
+			printf(" not found \n");
+
 	}
 	else {
 		/*PCD*/
