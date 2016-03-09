@@ -1394,12 +1394,17 @@ map_insertrloc_withsrc(rlocchain, rlocaddr, rlocmtx, srclocchain)
 		return(ENOBUFS);
 	}
 	newrloc->rloc.src_loc_chain = srclocchain;
+	printf("first source loc with weight \n",srclocchain->weight);
 
 	// it is different than the load balancing setting for destination locator
 	// where the chain is different, here we using the same chain structure
 	// since it is simpler, it is better not create a set load balancing function
 	newrloc->rloc.src_loc_LB_ring.wr = srclocchain;
 	newrloc->rloc.src_loc_LB_ring.cwr = srclocchain;
+
+	struct locator_chain * testsrcloc = newrloc->rloc.src_loc_LB_ring.wr;
+	printf("LB ring - first source loc with weight \n",testsrcloc->weight);
+
 	//call to set_load_balancing_for_srcloc
 	//here we create the load balancing table for te newrloc , before adding it into the chain
 	//the input should be the pointer to newrloc
@@ -1650,6 +1655,8 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 		  src_loc_count =  rmtx.src_loc_count;
 		  cp += sizeof(uint32_t);
 
+		  printf(" number of source locator is %d \n",rmtx.src_loc_count);
+
 		  // loop through all the source locators
 		  if (src_loc_count){
 			  // create the source locator chain
@@ -1695,6 +1702,7 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 				  cp += sizeof(uint8_t); // cp now point to weight
 				  new_srcloc->weight = *(uint8_t *)cp;
 				  new_srcloc->src_loc.src_loc_weight = *(uint8_t *)cp;
+				  printf(" weight is %d \n",new_srcloc->weight);
 				  // rmtx.weight  = *(uint8_t *)cp++;
 				  cp += sizeof(uint8_t); // cp point to flag
 				  //rmtx.flags =  *(uint16_t *)cp;
@@ -1732,12 +1740,26 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 				  }
 
 			  };
+
+			  //testing purpose only
+			  struct src_locator_chain *testp=srcloc_chain;
+			  int testc = 0;
+			  while (testp)
+			  {
+				  testc++;
+				  printf(" source locator #%d \n",testc);
+				  testp = testp->next;
+			  }
 			  printf(" number of source locator is %d \n",src_loc_count);
+
 			  if ((error = map_insertrloc_withsrc( &lc, ss, &rmtx, srcloc_chain))) {
 				  //Free already allocated RLOCs then return
 				  FreeRloc(*rlocs_chain);
 				  return(error);
 			  };
+
+			  //testing purpose
+
 
 		  }
 		  else  // if there is no src_loc_count, so just insert as normal
