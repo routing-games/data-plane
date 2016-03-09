@@ -1394,7 +1394,7 @@ map_insertrloc_withsrc(rlocchain, rlocaddr, rlocmtx, srclocchain)
 		return(ENOBUFS);
 	}
 	newrloc->rloc.src_loc_chain = srclocchain;
-	printf("first source loc with weight \n",srclocchain->weight);
+	printf("first source loc with weight %d \n",srclocchain->weight);
 
 	// it is different than the load balancing setting for destination locator
 	// where the chain is different, here we using the same chain structure
@@ -1402,8 +1402,8 @@ map_insertrloc_withsrc(rlocchain, rlocaddr, rlocmtx, srclocchain)
 	newrloc->rloc.src_loc_LB_ring.wr = srclocchain;
 	newrloc->rloc.src_loc_LB_ring.cwr = srclocchain;
 
-	struct locator_chain * testsrcloc = newrloc->rloc.src_loc_LB_ring.wr;
-	printf("LB ring - first source loc with weight \n",testsrcloc->weight);
+	struct src_locator_chain * testsrcloc = newrloc->rloc.src_loc_LB_ring.wr;
+	printf("LB ring - first source loc with weight %d \n",testsrcloc->weight);
 
 	//call to set_load_balancing_for_srcloc
 	//here we create the load balancing table for te newrloc , before adding it into the chain
@@ -1750,6 +1750,10 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 				  printf(" source locator #%d \n",testc);
 				  testp = testp->next;
 			  }
+			  // need to connect the last source locator connect with the first source locator
+			  // testp is now the last
+			  testp->next = srcloc_chain;
+
 			  printf(" number of source locator is %d \n",src_loc_count);
 
 			  if ((error = map_insertrloc_withsrc( &lc, ss, &rmtx, srcloc_chain))) {
