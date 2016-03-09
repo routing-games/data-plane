@@ -1714,8 +1714,9 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 				  cp += sizeof(uint32_t);
 				  // add the new constructed locator new_srcloc to the locator chain srcloc_chain
 				  rcp = rcpp = srcloc_chain;
+
 				  // find the correct position to add
-				  while ( rcp && rcp->weight < new_srcloc->weight)
+				  while ( rcp && rcp->weight <= new_srcloc->weight)
 				  {
 					  rcpp = rcp;
 					  rcp = rcp->next;
@@ -1727,6 +1728,7 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 						  rcpp->next = new_srcloc;
 					  else // the chain is newly construct without any elements
 						  srcloc_chain = new_srcloc;
+					  printf(" ADD \n");
 				  }
 				  else // rcp != NULL
 				  {
@@ -1737,11 +1739,13 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 						  new_srcloc->next = rcp;
 						  rcpp->next = new_srcloc;
 					  }
+					  printf(" add \n");
 				  }
 
 			  };
 
 			  //testing purpose only
+			  /*
 			  struct src_locator_chain *testp=srcloc_chain;
 			  int testc = 0;
 			  while (testp)
@@ -1749,10 +1753,17 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 				  testc++;
 				  printf(" source locator #%d \n",testc);
 				  testp = testp->next;
+				  if (testp->next == NULL)
+				  {
+					  testc++;
+					  testp->next = srcloc_chain;
+					  break;
+				  }
 			  }
+			  */
 			  // need to connect the last source locator connect with the first source locator
 			  // testp is now the last
-			  testp->next = srcloc_chain;
+			  // testp->next = srcloc_chain;
 
 			  printf(" number of source locator is %d \n",src_loc_count);
 
