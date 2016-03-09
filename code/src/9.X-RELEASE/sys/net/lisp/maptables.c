@@ -1661,13 +1661,14 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 		  if (src_loc_count){
 			  // create the source locator chain
 			  struct src_locator_chain *srcloc_chain, *rcp, *rcpp;
+			  srcloc_chain = NULL;
 			  // how about if we not using pointer ?
 
 
-			  R_Zalloc(srcloc_chain,struct src_locator_chain *,sizeof(struct src_locator_chain));
-			  if (srcloc_chain == NULL)
-				  return (ENOBUFS);
-			  bzero (srcloc_chain,sizeof(struct src_locator_chain));
+			 // R_Zalloc(srcloc_chain,struct src_locator_chain *,sizeof(struct src_locator_chain));
+			 // if (srcloc_chain == NULL)
+			 //	  return (ENOBUFS);
+			 //  bzero (srcloc_chain,sizeof(struct src_locator_chain));
 
 			  while (src_loc_count--) {
 
@@ -1716,7 +1717,7 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 				  rcp = rcpp = srcloc_chain;
 
 				  // find the correct position to add
-				  while ( rcp && rcp->weight <= new_srcloc->weight)
+				  while ( rcp && rcp->weight < new_srcloc->weight)
 				  {
 					  rcpp = rcp;
 					  rcp = rcp->next;
@@ -1764,7 +1765,12 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 			  // need to connect the last source locator connect with the first source locator
 			  // testp is now the last
 			  // testp->next = srcloc_chain;
-
+			  if (srcloc_chain == NULL)
+			  {
+				  printf(" src loc chain is NULL "); //testing
+				  return (ENOBUFS);
+			  }
+			  printf(" first locator weight is %d \n",srcloc_chain->weight);
 			  printf(" number of source locator is %d \n",src_loc_count);
 
 			  if ((error = map_insertrloc_withsrc( &lc, ss, &rmtx, srcloc_chain))) {
