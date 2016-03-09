@@ -1745,6 +1745,13 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 
 			  };
 
+			  struct src_locator_chain *last_loc=srcloc_chain;
+			  while (last_loc->next)
+			  {
+				  last_loc = last_loc->next;
+			  }
+			  last_loc->next = srcloc_chain; // link the last locator with first locator to form a ring
+
 			  //testing purpose only
 			  /*
 			  struct src_locator_chain *testp=srcloc_chain;
