@@ -380,20 +380,19 @@ map_select_srcrloc(dbmap, drloc,  srloc)
 	/*DPC*/
 	/*y5er*/
 	int srcloc_count = 0;
+	int egress_control = 0;
 	srcloc_count = drloc->rloc_metrix.rlocmtx.src_loc_count;
+	struct sockaddr_storage *src_locaddr;
+	struct src_locator *src_loc;
 
 	if (srcloc_count)
 	{
-		struct sockaddr_storage *src_locaddr;
-		struct src_locator *src_loc;
-
 		src_loc = &(drloc->src_loc_chain->src_loc); // temporary set, remove latter when LB done
 		src_locaddr = src_loc->src_loc_addr; // temporary set, remove latter when LB done
 		// src_locaddr = (struct src_loc *)(drloc->src_loc_chain.src_loc)->src_loc_addr ); [old]
 		// src_locaddr = drloc->src_loc_chain.src_loc.src_loc_addr; [old]
 
 		// printf(" select source rloc  \n");
-		int egress_control = 0;
 		if ( src_locaddr != NULL && srcloc_count )
 		{
 			egress_control = 1;
