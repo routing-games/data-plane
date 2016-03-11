@@ -381,58 +381,61 @@ map_select_srcrloc(dbmap, drloc,  srloc)
 	/*y5er*/
 	int srcloc_count = 0;
 	srcloc_count = drloc->rloc_metrix.rlocmtx.src_loc_count;
-	struct sockaddr_storage *src_locaddr;
-	struct src_locator *src_loc;
 
-	src_loc = &(drloc->src_loc_chain->src_loc); // temporary set, remove latter when LB done
-	src_locaddr = src_loc->src_loc_addr; // temporary set, remove latter when LB done
-	// src_locaddr = (struct src_loc *)(drloc->src_loc_chain.src_loc)->src_loc_addr ); [old]
-	// src_locaddr = drloc->src_loc_chain.src_loc.src_loc_addr; [old]
-
-    // printf(" select source rloc  \n");
-	int egress_control = 0;
-	if ( src_locaddr != NULL && srcloc_count )
+	if (srcloc_count)
 	{
-		egress_control = 1;
+		struct sockaddr_storage *src_locaddr;
+		struct src_locator *src_loc;
 
-		// we do load balancing for source locator based on the load balancing ring
-		// the line for source locator and source locator address could also be removed
-		// the logic for load balancing begin here
-		struct src_locator_chain *sloc; // source locator that will be used
-		struct src_locator_chain *c_sloc; // the current source locator, locator that has been used before
-		sloc = c_sloc =  drloc->src_loc_LB_ring.cwr; // point to current used source locator in the ring
-		if ( c_sloc && c_sloc->weight <= 0) // if this has been used up, move to next
+		src_loc = &(drloc->src_loc_chain->src_loc); // temporary set, remove latter when LB done
+		src_locaddr = src_loc->src_loc_addr; // temporary set, remove latter when LB done
+		// src_locaddr = (struct src_loc *)(drloc->src_loc_chain.src_loc)->src_loc_addr ); [old]
+		// src_locaddr = drloc->src_loc_chain.src_loc.src_loc_addr; [old]
+
+		// printf(" select source rloc  \n");
+		int egress_control = 0;
+		if ( src_locaddr != NULL && srcloc_count )
 		{
-			sloc = c_sloc->next;
-			while  ( (sloc != c_sloc) && (sloc->weight <= 0))  // skip locators that have been used up
+			egress_control = 1;
+
+			// we do load balancing for source locator based on the load balancing ring
+			// the line for source locator and source locator address could also be removed
+			// the logic for load balancing begin here
+			struct src_locator_chain *sloc; // source locator that will be used
+			struct src_locator_chain *c_sloc; // the current source locator, locator that has been used before
+			sloc = c_sloc =  drloc->src_loc_LB_ring.cwr; // point to current used source locator in the ring
+			if ( c_sloc && c_sloc->weight <= 0) // if this has been used up, move to next
 			{
-				sloc = sloc->next;
+				sloc = c_sloc->next;
+				while  ( (sloc != c_sloc) && (sloc->weight <= 0))  // skip locators that have been used up
+				{
+					sloc = sloc->next;
+				}
+				if ( sloc ==  c_sloc) // if all locator in chain have been used up
+				{
+					reset_load_balancing_for_srcloc(drloc);
+					sloc = drloc->src_loc_LB_ring.cwr;
+				}
 			}
-			if ( sloc ==  c_sloc) // if all locator in chain have been used up
+
+			if (sloc)
 			{
-				reset_load_balancing_for_srcloc(drloc);
-				sloc = drloc->src_loc_LB_ring.cwr;
+				src_loc = &(sloc->src_loc); // this has been selected as the source locator
+				src_locaddr = src_loc->src_loc_addr;
+
+				printf(" source rloc found with weight = %d  \n",sloc->weight);
+
+				sloc->weight = sloc->weight - 1 ; // decrease the weight of used locator
+				drloc->src_loc_LB_ring.cwr = sloc->next; // move pointer to the next locator
 			}
+			// identify the address of source locator will be used for encapsulation
+			// use that to select proper locator from the local db at latter step
+
+			// NEED to add a validation to check the source locator found with the output interface of this router
+			// validation should be do before !!!
+
 		}
-
-		if (sloc)
-		{
-			src_loc = &(sloc->src_loc); // this has been selected as the source locator
-			src_locaddr = src_loc->src_loc_addr;
-
-			printf(" source rloc found with weight = %d  \n",sloc->weight);
-
-			sloc->weight = sloc->weight - 1 ; // decrease the weight of used locator
-			drloc->src_loc_LB_ring.cwr = sloc->next; // move pointer to the next locator
-		}
-		// identify the address of source locator will be used for encapsulation
-		// use that to select proper locator from the local db at latter step
-
-		// NEED to add a validation to check the source locator found with the output interface of this router
-		// validation should be do before !!!
-
 	}
-
 		/*y5er*/
 
 	bzero( &out_ifa, sizeof(struct sockaddr_storage) );
