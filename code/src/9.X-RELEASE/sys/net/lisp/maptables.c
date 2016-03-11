@@ -382,8 +382,8 @@ map_select_srcrloc(dbmap, drloc,  srloc)
 	int srcloc_count = 0;
 	int egress_control = 0;
 	srcloc_count = drloc->rloc_metrix.rlocmtx.src_loc_count;
-	struct sockaddr_storage *src_locaddr;
-	struct src_locator *src_loc;
+	struct sockaddr_storage *src_locaddr = NULL;
+	struct src_locator *src_loc = NULL;
 
 	if (srcloc_count)
 	{
@@ -393,7 +393,7 @@ map_select_srcrloc(dbmap, drloc,  srloc)
 		// src_locaddr = drloc->src_loc_chain.src_loc.src_loc_addr; [old]
 
 		// printf(" select source rloc  \n");
-		if ( src_locaddr != NULL && srcloc_count )
+		if (src_locaddr != NULL )
 		{
 			egress_control = 1;
 
