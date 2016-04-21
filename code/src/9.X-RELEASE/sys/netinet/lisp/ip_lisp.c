@@ -91,7 +91,9 @@
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #include <sys/syslog.h>
-
+/*y5er*/
+#include <sys/time.h>
+/*y5er*/
 #include <vm/uma.h>
  
 #include <net/if.h>
@@ -125,8 +127,8 @@
 #include <machine/in_cksum.h>
 
 /*y5er*/
-#include <time.h>
-#include <sys/time.h>
+//#include <time.h>
+//#include <sys/time.h>
 /*y5er*/
 
 /* IPv4 Related Stats */
