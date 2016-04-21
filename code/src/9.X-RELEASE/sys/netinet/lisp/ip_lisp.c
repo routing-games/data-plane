@@ -967,6 +967,7 @@ lisp_output(m, hlen, local_map, remote_map)
 
 
 	/* y5er */
+	int n_packet=0; //packet count
 	struct timespec t_start_dest_select; // start destination locator selection process
 	struct timespec t_finish_src_select;// destination and source locator found
 	struct timespec t_finish_encapsulation; 	// packet is encapsulated
@@ -1014,7 +1015,7 @@ lisp_output(m, hlen, local_map, remote_map)
 	//clock_gettime(CLOCK_REALTIME, &start_dest_select);
 	// getmicrotime(&start_dest_select);
 	// printf(" Start destination lookup at %ld \n",start_dest_select.tv_sec*1000000+start_dest_select.tv_usec);
-	getnanotime(&t_start_dest_select);
+	nanotime(&t_start_dest_select);
 
 	/* y5er */
 
@@ -1061,9 +1062,13 @@ lisp_output(m, hlen, local_map, remote_map)
 	//printf(" Source locator found at %ld \n",finish_src_select.tv_sec*1000000+finish_src_select.tv_usec);
 	//clock_gettime( CLOCK_REALTIME, &finish_src_select);
 	// getmicrotime(&finish_src_select);
-	getnanotime(&t_finish_src_select);
-	printf(" Lookup delay %ld -- ", (t_finish_src_select.tv_sec*1000000000 + t_finish_src_select.tv_nsec)
+	nanotime(&t_finish_src_select);
+	if ((t_finish_src_select.tv_sec*1000000000 + t_finish_src_select.tv_nsec)
+			- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec))
+	{
+		printf(" Lookup delay %ld -- ", (t_finish_src_select.tv_sec*1000000000 + t_finish_src_select.tv_nsec)
 			- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec) );
+	}
 	/* y5er */
 
 	/* If the MTU of the source locator is set a check on the size
@@ -1138,9 +1143,17 @@ lisp_output(m, hlen, local_map, remote_map)
 		        //printf(" Encapsulation delay %ld \n", (finish_encapsulation.tv_sec*1000000  +finish_encapsulation.tv_usec)
 		        //		- (start_dest_select.tv_sec*1000000  + start_dest_select.tv_usec) );
 
-		        getnanotime(&t_finish_encapsulation);
+
+		        nanotime(&t_finish_encapsulation);
+		        if ((t_finish_encapsulation.tv_sec*1000000000 + t_finish_encapsulation.tv_nsec)
+		        		- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec))
+		        {
 		        printf(" Encapsulation delay %ld \n", (t_finish_encapsulation.tv_sec*1000000000 + t_finish_encapsulation.tv_nsec)
 		        		- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec) );
+		        printf(" total packet %d ",n_packet);
+		        }
+
+		        n_packet++;
 
 		        /* y5er */
 			FREE_EIDMAP(local_map);
