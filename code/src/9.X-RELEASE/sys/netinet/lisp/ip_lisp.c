@@ -124,6 +124,10 @@
 
 #include <machine/in_cksum.h>
 
+/*y5er*/
+#include <time.h>
+#include <sys/time.h>
+/*y5er*/
 
 /* IPv4 Related Stats */
 struct  lispbasicstat lisp4stat;
@@ -958,6 +962,13 @@ lisp_output(m, hlen, local_map, remote_map)
 	struct ip *ip = mtod(m, struct ip *);
 
 
+	/* y5er */
+	struct timeval start_dest_select;		// start destination locator selection process
+	struct timeval finish_src_select;		// destination and source locator found
+	struct timeval finish_encapsulation;	// packet is encapsulated
+	/* y5er */
+
+
 	KASSERT(local_map->mapping,"[LISP_OUTPUT] LISP output without local mapping");
 	KASSERT(m, "[LISP_OUTPUT] Output without packet");
 	
@@ -991,8 +1002,13 @@ lisp_output(m, hlen, local_map, remote_map)
 	 */
 	saved_ttl = ip->ip_ttl;
 
-	/* Destination RLOC selection 
-	 */
+	/* Destination RLOC selection */
+
+	/* y5er */
+	gettimeofday(&start_dest_select,NULL);
+	printf(" Start destination lookup at %ld \n",start_dest_select.tv_sec*1000000+start_dest_select.tv_usec);
+	/* y5er */
+
 	if ((error = map_select_dstrloc(remote_map->mapping, &dstrloc))){
 	       /* There is no available RLOC that can be used 
 		*/
@@ -1030,6 +1046,13 @@ lisp_output(m, hlen, local_map, remote_map)
 	        goto lisp_output_drop;
 
 	};
+
+	/* y5er */
+	gettimeofday(&finish_src_select,NULL);
+	// printf(" Source locator found at %ld \n",finish_src_select.tv_sec*1000000+finish_src_select.tv_usec);
+	printf(" Lookup delay %ld \n", (finish_src_select.tv_sec*1000000+finish_src_select.tv_usec)
+			- (start_dest_select.tv_sec*1000000+start_dest_select.tv_usec) );
+	/* y5er */
 
 	/* If the MTU of the source locator is set a check on the size
 	 * is performed.
@@ -1096,7 +1119,11 @@ lisp_output(m, hlen, local_map, remote_map)
 				error = ip_output(m, NULL, NULL, IP_LISP, NULL, NULL);
 
 			};
-			
+		        /* y5er */
+		        gettimeofday(&finish_encapsulation,NULL);
+		        printf(" Encapsulation delay %ld \n", (finish_encapsulation.tv_sec*1000000+finish_encapsulation.tv_usec)
+		        			- (start_dest_select.tv_sec*1000000+start_dest_select.tv_usec) );
+		        /* y5er */
 			FREE_EIDMAP(local_map);
 		        FREE_EIDMAP(remote_map);
 

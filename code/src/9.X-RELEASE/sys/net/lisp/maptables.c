@@ -422,7 +422,7 @@ map_select_srcrloc(dbmap, drloc,  srloc)
 				src_loc = &(sloc->src_loc); // this has been selected as the source locator
 				src_locaddr = src_loc->src_loc_addr;
 
-				printf(" source rloc found with weight = %d  \n",sloc->weight);
+				//printf(" source rloc found with weight = %d  \n",sloc->weight);
 
 				sloc->weight = sloc->weight - 1 ; // decrease the weight of used locator
 				drloc->src_loc_LB_ring.cwr = sloc->next; // move pointer to the next locator
@@ -511,9 +511,9 @@ map_select_srcrloc(dbmap, drloc,  srloc)
 				lc = lc->next;
 		};
 		if (lc)
-			printf(" found source rloc \n");
+			//printf(" found source rloc \n");
 		else
-			printf(" not found \n");
+			//printf(" not found \n");
 
 	}
 	else {
@@ -1398,7 +1398,7 @@ map_insertrloc_withsrc(rlocchain, rlocaddr, rlocmtx, srclocchain)
 		return(ENOBUFS);
 	}
 	newrloc->rloc.src_loc_chain = srclocchain;
-	printf("first source loc with weight %d \n",srclocchain->weight);
+	//printf("first source loc with weight %d \n",srclocchain->weight);
 
 	// it is different than the load balancing setting for destination locator
 	// where the chain is different, here we using the same chain structure
@@ -1407,7 +1407,7 @@ map_insertrloc_withsrc(rlocchain, rlocaddr, rlocmtx, srclocchain)
 	newrloc->rloc.src_loc_LB_ring.cwr = srclocchain;
 
 	struct src_locator_chain * testsrcloc = newrloc->rloc.src_loc_LB_ring.wr;
-	printf("LB ring - first source loc with weight %d \n",testsrcloc->weight);
+	//printf("LB ring - first source loc with weight %d \n",testsrcloc->weight);
 
 	//call to set_load_balancing_for_srcloc
 	//here we create the load balancing table for te newrloc , before adding it into the chain
@@ -1474,7 +1474,7 @@ map_insertrloc_withsrc(rlocchain, rlocaddr, rlocmtx, srclocchain)
 	        }
         };
         // just for testing purpose
-        printf("call to map_insertrloc_withsrc \n");
+        //printf("call to map_insertrloc_withsrc \n");
 
         return(0);
 
@@ -1659,7 +1659,7 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 		  src_loc_count =  rmtx.src_loc_count;
 		  cp += sizeof(uint32_t);
 
-		  printf(" number of source locator is %d \n",rmtx.src_loc_count);
+		  //printf(" number of source locator is %d \n",rmtx.src_loc_count);
 
 		  // loop through all the source locators
 		  if (src_loc_count){
@@ -1707,7 +1707,7 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 				  cp += sizeof(uint8_t); // cp now point to weight
 				  new_srcloc->weight = *(uint8_t *)cp;
 				  new_srcloc->src_loc.src_loc_weight = *(uint8_t *)cp;
-				  printf(" weight is %d \n",new_srcloc->weight);
+				  //printf(" weight is %d \n",new_srcloc->weight);
 				  // rmtx.weight  = *(uint8_t *)cp++;
 				  cp += sizeof(uint8_t); // cp point to flag
 				  //rmtx.flags =  *(uint16_t *)cp;
@@ -1733,7 +1733,7 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 						  rcpp->next = new_srcloc;
 					  else // the chain is newly construct without any elements
 						  srcloc_chain = new_srcloc;
-					  printf(" ADD \n");
+					  //printf(" ADD \n");
 				  }
 				  else // rcp != NULL
 				  {
@@ -1744,7 +1744,7 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 						  new_srcloc->next = rcp;
 						  rcpp->next = new_srcloc;
 					  }
-					  printf(" add \n");
+					  //printf(" add \n");
 				  }
 
 			  };
@@ -1778,11 +1778,11 @@ map_setrlocs(rlocs, rlocs_chain, rlocs_ct, lsbits, db)
 			  // testp->next = srcloc_chain;
 			  if (srcloc_chain == NULL)
 			  {
-				  printf(" src loc chain is NULL "); //testing
+				  //printf(" src loc chain is NULL "); //testing
 				  return (ENOBUFS);
 			  }
-			  printf(" first locator weight is %d \n",srcloc_chain->weight);
-			  printf(" number of source locator is %d \n",src_loc_count);
+			  //printf(" first locator weight is %d \n",srcloc_chain->weight);
+			  //printf(" number of source locator is %d \n",src_loc_count);
 
 			  if ((error = map_insertrloc_withsrc( &lc, ss, &rmtx, srcloc_chain))) {
 				  //Free already allocated RLOCs then return
