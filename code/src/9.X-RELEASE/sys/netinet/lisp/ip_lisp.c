@@ -93,7 +93,8 @@
 #include <sys/syslog.h>
 /*y5er*/
 #include <sys/time.h>
-#define BILLION  1000000000L;
+#include <sys/timespec.h>
+
 /*y5er*/
 #include <vm/uma.h>
  
@@ -1015,7 +1016,7 @@ lisp_output(m, hlen, local_map, remote_map)
 	//printf(" Start destination lookup at %ld \n",start_dest_select.tv_sec*1000000+start_dest_select.tv_usec);
 	//clock_gettime(CLOCK_REALTIME, &start_dest_select);
 	do_posix_clock_monotonic_gettime(&start_dest_select);
-	printf("Start destination lookup at %ld \n",start_dest_select.tv_sec*BILLION + start_dest_select.tv_nsec);
+	printf("Start destination lookup at %ld \n",start_dest_select.tv_sec + start_dest_select.tv_nsec);
 
 	/* y5er */
 
@@ -1063,8 +1064,8 @@ lisp_output(m, hlen, local_map, remote_map)
 
 	//clock_gettime( CLOCK_REALTIME, &finish_src_select);
 	do_posix_clock_monotonic_gettime(&finish_src_select);
-	printf(" Lookup delay %ld \n", (finish_src_select.tv_sec*BILLION+finish_src_select.tv_nsec)
-			- (start_dest_select.tv_sec*BILLION+start_dest_select.tv_nsec) );
+	printf(" Lookup delay %ld \n", (finish_src_select.tv_sec + finish_src_select.tv_nsec)
+			- (start_dest_select.tv_sec + start_dest_select.tv_nsec) );
 	/* y5er */
 
 	/* If the MTU of the source locator is set a check on the size
@@ -1136,8 +1137,8 @@ lisp_output(m, hlen, local_map, remote_map)
 		        // gettimeofday(&finish_encapsulation,NULL);
 		    	//clock_gettime( CLOCK_REALTIME, &finish_encapsulation);
 		        do_posix_clock_monotonic_gettime(&finish_encapsulation);
-		        printf(" Encapsulation delay %ld \n", (finish_encapsulation.tv_sec*BILLION+finish_encapsulation.tv_nsec)
-		        			- (start_dest_select.tv_sec*BILLION+start_dest_select.tv_nsec) );
+		        printf(" Encapsulation delay %ld \n", (finish_encapsulation.tv_sec +finish_encapsulation.tv_nsec)
+		        			- (start_dest_select.tv_sec + start_dest_select.tv_nsec) );
 		        /* y5er */
 			FREE_EIDMAP(local_map);
 		        FREE_EIDMAP(remote_map);
