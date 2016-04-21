@@ -510,9 +510,9 @@ map_select_srcrloc(dbmap, drloc,  srloc)
 
 				lc = lc->next;
 		};
-		if (lc)
+		//if (lc)
 			//printf(" found source rloc \n");
-		else
+		//else
 			//printf(" not found \n");
 
 	}
