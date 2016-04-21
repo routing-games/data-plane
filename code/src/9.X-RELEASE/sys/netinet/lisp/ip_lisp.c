@@ -93,6 +93,7 @@
 #include <sys/syslog.h>
 /*y5er*/
 #include <sys/time.h>
+#define BILLION  1000000000L;
 /*y5er*/
 #include <vm/uma.h>
  
@@ -965,9 +966,12 @@ lisp_output(m, hlen, local_map, remote_map)
 
 
 	/* y5er */
-	struct timeval start_dest_select;		// start destination locator selection process
-	struct timeval finish_src_select;		// destination and source locator found
-	struct timeval finish_encapsulation;	// packet is encapsulated
+	//struct timeval start_dest_select;		// start destination locator selection process
+	//struct timeval finish_src_select;		// destination and source locator found
+	//struct timeval finish_encapsulation;	// packet is encapsulated
+	struct timespec start_dest_select;
+	struct timespec finish_src_select;
+	struct timespec finish_encapsulation;
 	/* y5er */
 
 
@@ -1007,8 +1011,11 @@ lisp_output(m, hlen, local_map, remote_map)
 	/* Destination RLOC selection */
 
 	/* y5er */
-	gettimeofday(&start_dest_select,NULL);
-	printf(" Start destination lookup at %ld \n",start_dest_select.tv_sec*1000000+start_dest_select.tv_usec);
+	//gettimeofday(&start_dest_select,NULL);
+	//printf(" Start destination lookup at %ld \n",start_dest_select.tv_sec*1000000+start_dest_select.tv_usec);
+	clock_gettime( CLOCK_REALTIME, &start_dest_select)
+	printf(" Start destination lookup at %ld \n",start_dest_select.tv_sec*BILLION+start_dest_select.tv_nsec);
+
 	/* y5er */
 
 	if ((error = map_select_dstrloc(remote_map->mapping, &dstrloc))){
@@ -1050,10 +1057,12 @@ lisp_output(m, hlen, local_map, remote_map)
 	};
 
 	/* y5er */
-	gettimeofday(&finish_src_select,NULL);
-	// printf(" Source locator found at %ld \n",finish_src_select.tv_sec*1000000+finish_src_select.tv_usec);
-	printf(" Lookup delay %ld \n", (finish_src_select.tv_sec*1000000+finish_src_select.tv_usec)
-			- (start_dest_select.tv_sec*1000000+start_dest_select.tv_usec) );
+	//gettimeofday(&finish_src_select,NULL);
+	//printf(" Source locator found at %ld \n",finish_src_select.tv_sec*1000000+finish_src_select.tv_usec);
+
+	clock_gettime( CLOCK_REALTIME, &finish_src_select)
+	printf(" Lookup delay %ld \n", (finish_src_select.tv_sec*BILLION+finish_src_select.tv_nsec)
+			- (start_dest_select.tv_sec*BILLION+start_dest_select.tv_nsec) );
 	/* y5er */
 
 	/* If the MTU of the source locator is set a check on the size
@@ -1122,9 +1131,10 @@ lisp_output(m, hlen, local_map, remote_map)
 
 			};
 		        /* y5er */
-		        gettimeofday(&finish_encapsulation,NULL);
-		        printf(" Encapsulation delay %ld \n", (finish_encapsulation.tv_sec*1000000+finish_encapsulation.tv_usec)
-		        			- (start_dest_select.tv_sec*1000000+start_dest_select.tv_usec) );
+		        // gettimeofday(&finish_encapsulation,NULL);
+		    	clock_gettime( CLOCK_REALTIME, &finish_encapsulation)
+		        printf(" Encapsulation delay %ld \n", (finish_encapsulation.tv_sec*BILLION+finish_encapsulation.tv_nsec)
+		        			- (start_dest_select.tv_sec*BILLION+start_dest_select.tv_nsec) );
 		        /* y5er */
 			FREE_EIDMAP(local_map);
 		        FREE_EIDMAP(remote_map);
