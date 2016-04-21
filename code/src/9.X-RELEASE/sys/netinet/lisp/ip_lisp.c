@@ -970,9 +970,9 @@ lisp_output(m, hlen, local_map, remote_map)
 	struct timeval start_dest_select;		// start destination locator selection process
 	struct timeval finish_src_select;		// destination and source locator found
 	struct timeval finish_encapsulation;	// packet is encapsulated
-	//struct timespec start_dest_select;
-	//struct timespec finish_src_select;
-	//struct timespec finish_encapsulation;
+	struct timespec t_start_dest_select;
+	struct timespec t_finish_src_select;
+	struct timespec t_finish_encapsulation;
 	/* y5er */
 
 
@@ -1015,8 +1015,9 @@ lisp_output(m, hlen, local_map, remote_map)
 	//gettimeofday(&start_dest_select,NULL);
 	//printf(" Start destination lookup at %ld \n",start_dest_select.tv_sec*1000000+start_dest_select.tv_usec);
 	//clock_gettime(CLOCK_REALTIME, &start_dest_select);
-	getmicrotime(&start_dest_select);
-	printf(" Start destination lookup at %ld \n",start_dest_select.tv_sec*1000000+start_dest_select.tv_usec);
+	// getmicrotime(&start_dest_select);
+	// printf(" Start destination lookup at %ld \n",start_dest_select.tv_sec*1000000+start_dest_select.tv_usec);
+	getnanotime(&t_start_dest_select);
 
 	/* y5er */
 
@@ -1062,10 +1063,10 @@ lisp_output(m, hlen, local_map, remote_map)
 	//gettimeofday(&finish_src_select,NULL);
 	//printf(" Source locator found at %ld \n",finish_src_select.tv_sec*1000000+finish_src_select.tv_usec);
 	//clock_gettime( CLOCK_REALTIME, &finish_src_select);
-
-	getmicrotime(&finish_src_select);
-	printf(" Lookup delay %ld \n", (finish_src_select.tv_sec*1000000 + finish_src_select.tv_usec)
-			- (start_dest_select.tv_sec*1000000 + start_dest_select.tv_usec) );
+	// getmicrotime(&finish_src_select);
+	getnanotime(&t_finish_src_select);
+	printf(" Lookup delay %ld -- ", (t_finish_src_select.tv_sec*1000000000 + t_finish_src_select.tv_nsec)
+			- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec) );
 	/* y5er */
 
 	/* If the MTU of the source locator is set a check on the size
@@ -1136,9 +1137,14 @@ lisp_output(m, hlen, local_map, remote_map)
 		        /* y5er */
 		        // gettimeofday(&finish_encapsulation,NULL);
 		    	//clock_gettime( CLOCK_REALTIME, &finish_encapsulation);
-		        getmicrotime(&finish_encapsulation);
-		        printf(" Encapsulation delay %ld \n", (finish_encapsulation.tv_sec*1000000  +finish_encapsulation.tv_usec)
-		        			- (start_dest_select.tv_sec*1000000  + start_dest_select.tv_usec) );
+		        //getmicrotime(&finish_encapsulation);
+		        //printf(" Encapsulation delay %ld \n", (finish_encapsulation.tv_sec*1000000  +finish_encapsulation.tv_usec)
+		        //		- (start_dest_select.tv_sec*1000000  + start_dest_select.tv_usec) );
+
+		        getnanotime(&t_finish_encapsulation);
+		        printf(" Encapsulation delay %ld \n", (t_finish_encapsulation.tv_sec*1000000000 + t_finish_encapsulation.tv_nsec)
+		        		- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec) );
+
 		        /* y5er */
 			FREE_EIDMAP(local_map);
 		        FREE_EIDMAP(remote_map);
