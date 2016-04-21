@@ -1406,7 +1406,7 @@ map_insertrloc_withsrc(rlocchain, rlocaddr, rlocmtx, srclocchain)
 	newrloc->rloc.src_loc_LB_ring.wr = srclocchain;
 	newrloc->rloc.src_loc_LB_ring.cwr = srclocchain;
 
-	struct src_locator_chain * testsrcloc = newrloc->rloc.src_loc_LB_ring.wr;
+	//struct src_locator_chain * testsrcloc = newrloc->rloc.src_loc_LB_ring.wr;
 	//printf("LB ring - first source loc with weight %d \n",testsrcloc->weight);
 
 	//call to set_load_balancing_for_srcloc
