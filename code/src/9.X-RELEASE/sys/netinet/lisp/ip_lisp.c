@@ -1014,8 +1014,8 @@ lisp_output(m, hlen, local_map, remote_map)
 	//gettimeofday(&start_dest_select,NULL);
 	//printf(" Start destination lookup at %ld \n",start_dest_select.tv_sec*1000000+start_dest_select.tv_usec);
 	//clock_gettime(CLOCK_REALTIME, &start_dest_select);
-	do_posix_clock_monotonic_gettime(CLOCK_MONOTONIC, &start_dest_select);
-	printf(" Start destination lookup at %ld \n",start_dest_select.tv_sec*BILLION+start_dest_select.tv_nsec);
+	do_posix_clock_monotonic_gettime(&start_dest_select);
+	printf("Start destination lookup at %ld \n",start_dest_select.tv_sec*BILLION + start_dest_select.tv_nsec);
 
 	/* y5er */
 
@@ -1062,7 +1062,7 @@ lisp_output(m, hlen, local_map, remote_map)
 	//printf(" Source locator found at %ld \n",finish_src_select.tv_sec*1000000+finish_src_select.tv_usec);
 
 	//clock_gettime( CLOCK_REALTIME, &finish_src_select);
-	do_posix_clock_monotonic_gettime(CLOCK_MONOTONIC, &finish_src_select);
+	do_posix_clock_monotonic_gettime(&finish_src_select);
 	printf(" Lookup delay %ld \n", (finish_src_select.tv_sec*BILLION+finish_src_select.tv_nsec)
 			- (start_dest_select.tv_sec*BILLION+start_dest_select.tv_nsec) );
 	/* y5er */
@@ -1135,7 +1135,7 @@ lisp_output(m, hlen, local_map, remote_map)
 		        /* y5er */
 		        // gettimeofday(&finish_encapsulation,NULL);
 		    	//clock_gettime( CLOCK_REALTIME, &finish_encapsulation);
-		        do_posix_clock_monotonic_gettime(CLOCK_MONOTONIC, &finish_encapsulation);
+		        do_posix_clock_monotonic_gettime(&finish_encapsulation);
 		        printf(" Encapsulation delay %ld \n", (finish_encapsulation.tv_sec*BILLION+finish_encapsulation.tv_nsec)
 		        			- (start_dest_select.tv_sec*BILLION+start_dest_select.tv_nsec) );
 		        /* y5er */
