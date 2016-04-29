@@ -967,7 +967,6 @@ lisp_output(m, hlen, local_map, remote_map)
 
 
 	/* y5er */
-	int n_packet=0; //packet count
 	struct timespec t_start_dest_select; // start destination locator selection process
 	struct timespec t_finish_src_select;// destination and source locator found
 	struct timespec t_finish_encapsulation; 	// packet is encapsulated
@@ -1068,6 +1067,10 @@ lisp_output(m, hlen, local_map, remote_map)
 	{
 		printf(" Lookup delay %ld -- ", (t_finish_src_select.tv_sec*1000000000 + t_finish_src_select.tv_nsec)
 			- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec) );
+
+		 DEBUGLISP("[LISP_INPUT] Lookup delay %ld  " ,(t_finish_src_select.tv_sec*1000000000 + t_finish_src_select.tv_nsec)
+					- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec)  );
+
 	}
 	/* y5er */
 
@@ -1150,10 +1153,11 @@ lisp_output(m, hlen, local_map, remote_map)
 		        {
 		        printf(" Encapsulation delay %ld \n", (t_finish_encapsulation.tv_sec*1000000000 + t_finish_encapsulation.tv_nsec)
 		        		- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec) );
-		        printf(" total packet %d ",n_packet);
+
+		        DEBUGLISP("[LISP_INPUT] Encapsulation delay %ld \n" ,(t_finish_encapsulation.tv_sec*1000000000 + t_finish_encapsulation.tv_nsec)
+		        		        		- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec) );
 		        }
 
-		        n_packet++;
 
 		        /* y5er */
 			FREE_EIDMAP(local_map);
