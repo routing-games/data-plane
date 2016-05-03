@@ -1,0 +1,47 @@
+May  2 15:11:45 xTR_sg newsyslog[833]: logfile first created
+May  2 15:21:32 xTR_sg kernel: [LISP_CACHE_XPG] Expunged 0 out of  0 Expired Entries (out of 0)
+May  2 15:21:32 xTR_sg last message repeated 3 times
+May  2 15:31:32 xTR_sg kernel: [LISP_CACHE_XPG] Expunged 0 out of  0 Expired Entries (out of 0)
+May  2 15:41:32 xTR_sg last message repeated 7 times
+May  2 15:51:32 xTR_sg last message repeated 4 times
+May  2 16:01:32 xTR_sg last message repeated 4 times
+May  2 16:11:32 xTR_sg last message repeated 4 times
+May  2 16:21:32 xTR_sg last message repeated 4 times
+May  2 16:31:32 xTR_sg last message repeated 4 times
+May  2 16:41:32 xTR_sg last message repeated 4 times
+May  2 16:51:32 xTR_sg last message repeated 4 times
+May  2 17:01:32 xTR_sg last message repeated 4 times
+May  2 17:09:06 xTR_sg kernel: [LISP_INPUT] Lookup delay 266452 
+May  2 17:09:06 xTR_sg kernel: [LISP_INPUT] Encapsulation delay 1014077 
+May  2 17:09:07 xTR_sg kernel: [LISP_INPUT] Lookup delay 4318 
+May  2 17:09:07 xTR_sg kernel: [LISP_INPUT] Encapsulation delay 203581 
+May  2 17:09:08 xTR_sg kernel: [LISP_INPUT] Lookup delay 5142 
+May  2 17:09:08 xTR_sg kernel: [LISP_INPUT] Encapsulation delay 304044 
+May  2 17:09:09 xTR_sg kernel: [LISP_INPUT] Lookup delay 4129 
+May  2 17:09:09 xTR_sg kernel: [LISP_INPUT] Encapsulation delay 199703 
+May  2 17:09:10 xTR_sg kernel: [LISP_INPUT] Lookup delay 4110 
+May  2 17:09:10 xTR_sg kernel: [LISP_INPUT] Encapsulation delay 199934 
+May  2 17:09:11 xTR_sg kernel: [LISP_INPUT] Lookup delay 4128 
+May  2 17:09:11 xTR_sg kernel: [LISP_INPUT] Encapsulation delay 288977 
+May  2 17:09:12 xTR_sg kernel: [LISP_INPUT] Lookup delay 3884 
+May  2 17:09:12 xTR_sg kernel: [LISP_INPUT] Encapsulation delay 205302 
+May  2 17:09:43 xTR_sg kernel: [LISP_INPUT] Lookup delay 24782 
+May  2 17:09:43 xTR_sg kernel: [LISP_INPUT] Encapsulation delay 682919 
+May  2 17:09:43 xTR_sg kernel: [LISP_INPUT] Lookup delay 3345 
+May  2 17:09:43 xTR_sg kernel: [LISP_INPUT] Encapsulation delay 545673 
+May  2 17:09:43 xTR_sg kernel: [LISP_INPUT] Lookup delay 5854 
+May  2 17:09:43 xTR_sg kernel: [LISP_INPUT] Encapsulation delay 301161 
+May  2 17:09:43 xTR_sg kernel: [LISP_INPUT] Lookup delay 3081 
+May  2 17:09:43 xTR_sg kernel: [LISP_INPUT] Encapsulation delay 269705 
+May  2 17:09:43 xTR_sg kernel: [LISP_INPUT] Lookup delay 3595 
+May  2 17:09:43 xTR_sg kernel: [LISP_INPUT] Encapsulation delay 267783 
+May  2 17:09:43 xTR_sg kernel: [LISP_INPUT] Lookup delay 4518 
+May  2 17:09:43 xTR_sg kernel: [LISP_INPUT] Encapsulation delay 355774 
+May  2 17:09:43 xTR_sg kernel: [LISP_INPUT] Lookup delay 3493 
+May  2 17:09:43 xTR_sg kernel: [LISP_INPUT] Encapsulation delay 292415 
+May  2 17:09:43 xTR_sg kernel: [LISP_INPUT] Lookup delay 2584 
+May  2 17:09:43 xTR_sg kernel: [LISP_INPUT] Encapsulation delay 392529 
+May  2 17:09:43 xTR_sg kernel: [LISP_INPUT] Lookup delay 3194 
+May  2 17:09:43 xTR_sg kernel: [LISP_INPUT] Encapsulation delay 211388 
+May  2 17:09:43 xTR_sg kernel: [LISP_INPUT] Lookup delay 4697 
+May  2 17:09:43 xTR_sg kernel: [LISP_INPUT] Encapsulation delay 287840 
