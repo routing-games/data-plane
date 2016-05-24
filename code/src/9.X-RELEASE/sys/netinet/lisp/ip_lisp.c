@@ -1065,8 +1065,8 @@ lisp_output(m, hlen, local_map, remote_map)
 	if ((t_finish_src_select.tv_sec*1000000000 + t_finish_src_select.tv_nsec)
 			- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec))
 	{
-		printf(" Lookup delay %ld -- ", (t_finish_src_select.tv_sec*1000000000 + t_finish_src_select.tv_nsec)
-			- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec) );
+		//printf(" Lookup delay %ld -- ", (t_finish_src_select.tv_sec*1000000000 + t_finish_src_select.tv_nsec)
+			//- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec) );
 
 	#ifdef LISP_DEBUG
 	log(LOG_DEBUG,"[LISP_INPUT] Lookup delay %ld " ,(t_finish_src_select.tv_sec*1000000000 + t_finish_src_select.tv_nsec)
@@ -1153,8 +1153,8 @@ lisp_output(m, hlen, local_map, remote_map)
 		        if ((t_finish_encapsulation.tv_sec*1000000000 + t_finish_encapsulation.tv_nsec)
 		        		- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec))
 		        {
-		        printf(" Encapsulation delay %ld \n", (t_finish_encapsulation.tv_sec*1000000000 + t_finish_encapsulation.tv_nsec)
-		        		- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec) );
+		        //printf(" Encapsulation delay %ld \n", (t_finish_encapsulation.tv_sec*1000000000 + t_finish_encapsulation.tv_nsec)
+		        		//- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec) );
 
 				#ifdef LISP_DEBUG
 		        log(LOG_DEBUG,"[LISP_INPUT] Encapsulation delay %ld \n" ,(t_finish_encapsulation.tv_sec*1000000000 + t_finish_encapsulation.tv_nsec)
