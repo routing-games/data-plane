@@ -1061,6 +1061,7 @@ lisp_output(m, hlen, local_map, remote_map)
 	//printf(" Source locator found at %ld \n",finish_src_select.tv_sec*1000000+finish_src_select.tv_usec);
 	//clock_gettime( CLOCK_REALTIME, &finish_src_select);
 	// getmicrotime(&finish_src_select);
+	/*
 	nanotime(&t_finish_src_select);
 	if ((t_finish_src_select.tv_sec*1000000000 + t_finish_src_select.tv_nsec)
 			- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec))
@@ -1069,11 +1070,12 @@ lisp_output(m, hlen, local_map, remote_map)
 			//- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec) );
 
 	#ifdef LISP_DEBUG
-	log(LOG_DEBUG,"[LISP_INPUT] Lookup delay %ld " ,(t_finish_src_select.tv_sec*1000000000 + t_finish_src_select.tv_nsec)
-				- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec)  );
-	#endif /* LISP_DEBUG */
-
+	//log(LOG_DEBUG,"[LISP_INPUT] Lookup delay %ld " ,(t_finish_src_select.tv_sec*1000000000 + t_finish_src_select.tv_nsec)
+		//		- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec)  );
+	#endif
 	}
+	*/
+
 	/* y5er */
 
 	/* If the MTU of the source locator is set a check on the size
