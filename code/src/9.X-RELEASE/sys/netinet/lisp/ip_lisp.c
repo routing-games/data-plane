@@ -968,7 +968,7 @@ lisp_output(m, hlen, local_map, remote_map)
 
 	/* y5er */
 	struct timespec t_start_dest_select; // start destination locator selection process
-	struct timespec t_finish_src_select;// destination and source locator found
+	//struct timespec t_finish_src_select;// destination and source locator found
 	struct timespec t_finish_encapsulation; 	// packet is encapsulated
 	/* y5er */
 
