@@ -1057,8 +1057,6 @@ lisp_output(m, hlen, local_map, remote_map)
 	log(LOG_DEBUG,"[Delay 1] %ld\n" ,(t_finish_src_select.tv_sec*1000000000 + t_finish_src_select.tv_nsec)
 				- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec)  );
 	#endif
-	}
-	*/
 
 	/* y5er */
 
