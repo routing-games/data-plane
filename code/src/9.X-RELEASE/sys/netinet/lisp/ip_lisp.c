@@ -967,8 +967,8 @@ lisp_output(m, hlen, local_map, remote_map)
 
 
 	/* y5er */
-	struct timespec t_start_dest_select; // start destination locator selection process
-	//struct timespec t_finish_src_select;// destination and source locator found
+	struct timespec t_start_dest_select; 		// start destination locator selection process
+	struct timespec t_finish_src_select;		// destination and source locator found
 	struct timespec t_finish_encapsulation; 	// packet is encapsulated
 	/* y5er */
 
@@ -1009,13 +1009,7 @@ lisp_output(m, hlen, local_map, remote_map)
 	/* Destination RLOC selection */
 
 	/* y5er */
-	//gettimeofday(&start_dest_select,NULL);
-	//printf(" Start destination lookup at %ld \n",start_dest_select.tv_sec*1000000+start_dest_select.tv_usec);
-	//clock_gettime(CLOCK_REALTIME, &start_dest_select);
-	// getmicrotime(&start_dest_select);
-	// printf(" Start destination lookup at %ld \n",start_dest_select.tv_sec*1000000+start_dest_select.tv_usec);
 	nanotime(&t_start_dest_select);
-
 	/* y5er */
 
 	if ((error = map_select_dstrloc(remote_map->mapping, &dstrloc))){
@@ -1057,21 +1051,11 @@ lisp_output(m, hlen, local_map, remote_map)
 	};
 
 	/* y5er */
-	//gettimeofday(&finish_src_select,NULL);
-	//printf(" Source locator found at %ld \n",finish_src_select.tv_sec*1000000+finish_src_select.tv_usec);
-	//clock_gettime( CLOCK_REALTIME, &finish_src_select);
-	// getmicrotime(&finish_src_select);
-	/*
 	nanotime(&t_finish_src_select);
-	if ((t_finish_src_select.tv_sec*1000000000 + t_finish_src_select.tv_nsec)
-			- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec))
-	{
-		//printf(" Lookup delay %ld -- ", (t_finish_src_select.tv_sec*1000000000 + t_finish_src_select.tv_nsec)
-			//- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec) );
 
 	#ifdef LISP_DEBUG
-	//log(LOG_DEBUG,"[LISP_INPUT] Lookup delay %ld " ,(t_finish_src_select.tv_sec*1000000000 + t_finish_src_select.tv_nsec)
-		//		- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec)  );
+	log(LOG_DEBUG,"[Delay 1] %ld\n" ,(t_finish_src_select.tv_sec*1000000000 + t_finish_src_select.tv_nsec)
+				- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec)  );
 	#endif
 	}
 	*/
@@ -1144,30 +1128,18 @@ lisp_output(m, hlen, local_map, remote_map)
 
 			};
 		        /* y5er */
-		        // gettimeofday(&finish_encapsulation,NULL);
-		    	//clock_gettime( CLOCK_REALTIME, &finish_encapsulation);
-		        //getmicrotime(&finish_encapsulation);
-		        //printf(" Encapsulation delay %ld \n", (finish_encapsulation.tv_sec*1000000  +finish_encapsulation.tv_usec)
-		        //		- (start_dest_select.tv_sec*1000000  + start_dest_select.tv_usec) );
-
 
 		        nanotime(&t_finish_encapsulation);
-		        if ((t_finish_encapsulation.tv_sec*1000000000 + t_finish_encapsulation.tv_nsec)
-		        		- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec))
-		        {
-		        //printf(" Encapsulation delay %ld \n", (t_finish_encapsulation.tv_sec*1000000000 + t_finish_encapsulation.tv_nsec)
-		        		//- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec) );
 
 				#ifdef LISP_DEBUG
-		        log(LOG_DEBUG,"[LISP_INPUT] Encapsulation delay %ld \n" ,(t_finish_encapsulation.tv_sec*1000000000 + t_finish_encapsulation.tv_nsec)
+		        log(LOG_DEBUG,"[Delay 2] %ld\n" ,(t_finish_encapsulation.tv_sec*1000000000 + t_finish_encapsulation.tv_nsec)
 		        		        		- (t_start_dest_select.tv_sec*1000000000 + t_start_dest_select.tv_nsec) );
 				#endif /* LISP_DEBUG */
-		        }
-
 
 		        /* y5er */
+
 			FREE_EIDMAP(local_map);
-		        FREE_EIDMAP(remote_map);
+		    FREE_EIDMAP(remote_map);
 
 			return (error);
 			
